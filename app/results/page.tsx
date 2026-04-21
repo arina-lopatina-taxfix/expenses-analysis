@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { TaxAnalysis, ExpenseCategory } from "@/lib/types";
 
+const LOGO = "https://www.figma.com/api/mcp/asset/ab431d81-bc37-4d25-ac54-3eb0871dd297";
+
 const MOCK_DATA: TaxAnalysis = {
   taxYear: "2024/25",
   incomeType: "Self-employed",
@@ -76,42 +78,73 @@ const MOCK_DATA: TaxAnalysis = {
   ],
 };
 
-function formatAmount(amount: number): string {
-  return `£${amount.toLocaleString("en-GB")}`;
+function fmt(n: number) {
+  return `£${n.toLocaleString("en-GB")}`;
 }
 
 function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
   return (
-    <div className="bg-white rounded-2xl border border-black/10 p-4 flex flex-col gap-3">
-      {/* Header row */}
+    <div
+      className="bg-white flex flex-col"
+      style={{ borderRadius: 16, padding: 16, gap: 12, border: "1px solid rgba(12,11,10,0.08)" }}
+    >
+      {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">{category.emoji}</span>
-          <span className="text-[15px] font-semibold text-[#0c0b0a]">
+          <span className="text-2xl leading-none">{category.emoji}</span>
+          <span
+            className="text-[16px] text-[#0c0b0a]"
+            style={{ fontWeight: 500, lineHeight: "20px" }}
+          >
             {category.name}
           </span>
         </div>
         {category.claimedAmount !== undefined && (
-          <span className="chip-green text-[13px] font-semibold whitespace-nowrap">
-            {formatAmount(category.claimedAmount)}
+          <span
+            className="inline-flex items-center px-3 text-[13px] rounded-full whitespace-nowrap"
+            style={{
+              height: 28,
+              background: "rgba(160,215,102,0.2)",
+              color: "#36893b",
+              fontWeight: 600,
+            }}
+          >
+            {fmt(category.claimedAmount)}
           </span>
         )}
       </div>
 
-      {/* Claimed description */}
+      {/* Description */}
       {category.claimedDescription && (
-        <p className="text-[13px] text-[rgba(12,11,10,0.65)] leading-relaxed">
+        <p
+          className="text-[14px] text-[rgba(12,11,10,0.8)]"
+          style={{ lineHeight: "20px" }}
+        >
           {category.claimedDescription}
         </p>
       )}
 
       {/* Advice box */}
       {category.adviceText && (
-        <div className="bg-[#f9f7f5] rounded-xl p-3 flex flex-col gap-1">
-          <p className="text-[12px] font-semibold text-[#0c0b0a] flex items-center gap-1">
+        <div
+          className="flex flex-col"
+          style={{
+            background: "#f9f7f5",
+            borderRadius: 12,
+            padding: 14,
+            gap: 4,
+          }}
+        >
+          <p
+            className="flex items-center gap-1.5 text-[14px] text-[#0c0b0a]"
+            style={{ fontWeight: 700, lineHeight: "20px" }}
+          >
             <span>⚡</span> Advice
           </p>
-          <p className="text-[12px] text-[rgba(12,11,10,0.65)] leading-relaxed">
+          <p
+            className="text-[14px] text-[rgba(12,11,10,0.8)]"
+            style={{ lineHeight: "20px" }}
+          >
             {category.adviceText}
           </p>
         </div>
@@ -124,34 +157,66 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
   const total =
     category.deductions?.reduce((sum, d) => sum + d.estimatedAmount, 0) ?? 0;
   return (
-    <div className="bg-white rounded-2xl border border-black/10 p-4 flex flex-col gap-3">
-      {/* Header row */}
+    <div
+      className="bg-white flex flex-col"
+      style={{ borderRadius: 16, padding: 16, gap: 12, border: "1px solid rgba(12,11,10,0.08)" }}
+    >
+      {/* Header */}
       <div className="flex items-center gap-2">
-        <span className="text-2xl">{category.emoji}</span>
-        <span className="text-[15px] font-semibold text-[#0c0b0a]">
+        <span className="text-2xl leading-none">{category.emoji}</span>
+        <span
+          className="text-[16px] text-[#0c0b0a]"
+          style={{ fontWeight: 500, lineHeight: "20px" }}
+        >
           {category.name}
         </span>
         {total > 0 && (
-          <span className="ml-auto chip-orange text-[13px] font-semibold whitespace-nowrap">
-            ~{formatAmount(total)}
+          <span
+            className="ml-auto inline-flex items-center px-3 text-[13px] rounded-full whitespace-nowrap"
+            style={{
+              height: 28,
+              background: "#ffefd3",
+              color: "#a05a00",
+              fontWeight: 600,
+            }}
+          >
+            ~{fmt(total)}
           </span>
         )}
       </div>
 
       {/* Deductions box */}
       {category.deductions && category.deductions.length > 0 && (
-        <div className="bg-[#ffefd3] rounded-xl p-3 flex flex-col gap-2">
-          <p className="text-[12px] font-semibold text-[#0c0b0a] flex items-center gap-1">
+        <div
+          className="flex flex-col"
+          style={{ background: "#ffefd3", borderRadius: 12, padding: 14, gap: 8 }}
+        >
+          <p
+            className="flex items-center gap-1.5 text-[14px] text-[#0c0b0a]"
+            style={{ fontWeight: 700, lineHeight: "20px" }}
+          >
             <span>❓</span> What you can deduct?
           </p>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col" style={{ gap: 8 }}>
             {category.deductions.map((d, i) => (
               <div key={i} className="flex items-center justify-between gap-2">
-                <span className="text-[12px] text-[rgba(12,11,10,0.7)] leading-snug">
+                <span
+                  className="text-[14px] text-[rgba(12,11,10,0.8)]"
+                  style={{ lineHeight: "20px" }}
+                >
                   {d.description}
                 </span>
-                <span className="text-[11px] font-semibold bg-white rounded-full px-2 py-0.5 text-[#a05a00] whitespace-nowrap border border-[#f0d090]">
-                  ~{formatAmount(d.estimatedAmount)}
+                <span
+                  className="inline-flex items-center px-2 text-[12px] rounded-full whitespace-nowrap flex-shrink-0"
+                  style={{
+                    height: 24,
+                    background: "white",
+                    color: "#a05a00",
+                    fontWeight: 600,
+                    border: "1px solid #f0d090",
+                  }}
+                >
+                  ~{fmt(d.estimatedAmount)}
                 </span>
               </div>
             ))}
@@ -181,7 +246,7 @@ export default function ResultsPage() {
 
   if (!analysis) {
     return (
-      <div className="min-h-screen bg-[#f9f7f5] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#a0d766] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -190,35 +255,35 @@ export default function ResultsPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* App bar */}
-      <header className="sticky top-0 z-20 bg-white shadow-sm px-4 py-3 flex items-center justify-between">
-        <button
-          onClick={() => router.push("/upload")}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors"
-          aria-label="Back"
-        >
-          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18l-6-6 6-6" stroke="rgba(12,11,10,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <span className="text-[13px] font-semibold text-[rgba(12,11,10,0.5)]">
-          Tax Return Analysis
-        </span>
-        <div className="w-8" />
+      <header
+        className="sticky top-0 z-20 bg-white flex items-center justify-center px-10"
+        style={{
+          height: 75,
+          boxShadow: "0px 2px 4px rgba(0,0,0,0.08), 0px 0px 2px rgba(0,0,0,0.08)",
+        }}
+      >
+        <img src={LOGO} alt="Taxfix" className="h-[27px] w-[96px] object-contain" />
       </header>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto pb-24">
-        {/* White top section */}
-        <div className="bg-white px-4 pt-4 pb-6 flex flex-col gap-2">
-          <p className="text-[11px] font-bold tracking-[0.12em] text-[#36893b] uppercase">
+      <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
+        {/* White header section */}
+        <div
+          className="flex flex-col items-center text-center px-6"
+          style={{ paddingTop: 32, paddingBottom: 32, gap: 8 }}
+        >
+          <p
+            className="uppercase tracking-widest text-[#36893b] text-[12px]"
+            style={{ fontWeight: 400, letterSpacing: "0.1em" }}
+          >
             Your tax return {analysis.taxYear}
           </p>
-          <h1 className="text-[28px] font-bold text-[#0c0b0a] leading-tight">
+          <h1
+            className="text-[30px] text-[#0c0b0a]"
+            style={{ fontWeight: 700, lineHeight: "1.2", maxWidth: 600 }}
+          >
             You could have claimed{" "}
-            <span className="text-[#36893b]">
-              {formatAmount(analysis.totalMissedDeductions)}
-            </span>{" "}
-            more
+            <span style={{ color: "#36893b" }}>{fmt(analysis.totalMissedDeductions)}</span> more
           </h1>
           {analysis.businessType && (
             <p className="text-[14px] text-[rgba(12,11,10,0.6)]">
@@ -227,38 +292,72 @@ export default function ResultsPage() {
           )}
         </div>
 
-        {/* Beige bottom section */}
-        <div className="bg-[#f9f7f5] rounded-tl-[30px] rounded-tr-[30px] px-4 pt-6 pb-4 flex flex-col gap-6">
-          {/* On desktop: two columns; on mobile: stacked */}
-          <div className="flex flex-col xl:flex-row gap-6 xl:gap-12 xl:items-start">
-            {/* LEFT column: Already claiming */}
-            <div className="flex flex-col gap-3 flex-1">
+        {/* Beige content section */}
+        <div
+          className="px-4 xl:px-16"
+          style={{
+            background: "#f9f7f5",
+            borderTopLeftRadius: 30,
+            borderTopRightRadius: 30,
+            paddingTop: 32,
+            paddingBottom: 32,
+          }}
+        >
+          {/* Two column layout */}
+          <div
+            className="flex flex-col xl:flex-row xl:items-start mx-auto"
+            style={{ gap: 53, maxWidth: 1051 }}
+          >
+            {/* LEFT — Already expensing */}
+            <div className="flex flex-col flex-1" style={{ gap: 16 }}>
               <div className="flex items-center justify-between">
-                <h2 className="text-[15px] font-bold text-[#0c0b0a]">
+                <h2
+                  className="text-[20px] text-[#0c0b0a]"
+                  style={{ fontWeight: 700, lineHeight: "28px", letterSpacing: "-0.2px" }}
+                >
                   What you are already expensing
                 </h2>
-                <span className="chip-gray text-[12px]">
+                <span
+                  className="inline-flex items-center px-3 text-[13px] rounded-lg whitespace-nowrap bg-white"
+                  style={{
+                    height: 32,
+                    color: "rgba(12,11,10,0.65)",
+                    border: "1px solid rgba(12,11,10,0.1)",
+                    fontWeight: 500,
+                  }}
+                >
                   {analysis.alreadyClaiming.length} categories
                 </span>
               </div>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col" style={{ gap: 12 }}>
                 {analysis.alreadyClaiming.map((cat, i) => (
                   <AlreadyClaimingCard key={i} category={cat} />
                 ))}
               </div>
             </div>
 
-            {/* RIGHT column: Can improve */}
-            <div className="flex flex-col gap-3 flex-1">
+            {/* RIGHT — Can improve */}
+            <div className="flex flex-col flex-1" style={{ gap: 16 }}>
               <div className="flex items-center justify-between">
-                <h2 className="text-[15px] font-bold text-[#0c0b0a]">
+                <h2
+                  className="text-[20px] text-[#0c0b0a]"
+                  style={{ fontWeight: 700, lineHeight: "28px", letterSpacing: "-0.2px" }}
+                >
                   What can be improved
                 </h2>
-                <span className="chip-gray text-[12px]">
+                <span
+                  className="inline-flex items-center px-3 text-[13px] rounded-lg whitespace-nowrap bg-white"
+                  style={{
+                    height: 32,
+                    color: "rgba(12,11,10,0.65)",
+                    border: "1px solid rgba(12,11,10,0.1)",
+                    fontWeight: 500,
+                  }}
+                >
                   {analysis.canImprove.length} categories
                 </span>
               </div>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col" style={{ gap: 12 }}>
                 {analysis.canImprove.map((cat, i) => (
                   <CanImproveCard key={i} category={cat} />
                 ))}
@@ -269,21 +368,29 @@ export default function ResultsPage() {
       </div>
 
       {/* Sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-black/10 px-4 py-3 flex gap-3">
+      <div
+        className="fixed bottom-0 left-0 right-0 z-20 bg-white flex items-center justify-between px-10"
+        style={{
+          height: 80,
+          borderTop: "1px solid #f4f1f1",
+        }}
+      >
         <button
           onClick={() => router.push("/upload")}
-          className="flex-1 h-12 bg-transparent text-[rgba(12,11,10,0.65)] font-medium text-[15px] rounded-[10px] hover:bg-black/5 transition-colors"
+          className="flex items-center gap-2 text-[#154618] text-[16px] transition-colors hover:opacity-70"
+          style={{ fontWeight: 500 }}
         >
+          <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+            <path d="M13 16l-6-6 6-6" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
           Back
         </button>
         <button
-          onClick={() => {
-            // Download or share — could be extended
-            window.print();
-          }}
-          className="flex-1 h-12 bg-[#a0d766] text-[#154618] font-semibold text-[15px] rounded-[10px] hover:brightness-95 active:scale-[0.98] transition-all"
+          onClick={() => window.print()}
+          className="h-12 bg-[#a0d766] text-[#154618] text-[16px] rounded-[10px] hover:brightness-95 active:scale-[0.98] transition-all"
+          style={{ width: 177, fontWeight: 600 }}
         >
-          Save report
+          Continue
         </button>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { TaxAnalysis, ExpenseCategory } from "@/lib/types";
 
-const LOGO = "https://www.figma.com/api/mcp/asset/ab431d81-bc37-4d25-ac54-3eb0871dd297";
+const LOGO = "https://www.figma.com/api/mcp/asset/0f54586b-884a-43e7-ba5a-46cee4829c8b";
 
 const MOCK_DATA: TaxAnalysis = {
   taxYear: "2024/25",
@@ -84,67 +84,51 @@ function fmt(n: number) {
 
 function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
   return (
-    <div
-      className="bg-white flex flex-col"
-      style={{ borderRadius: 16, padding: 16, gap: 12, border: "1px solid rgba(12,11,10,0.08)" }}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl leading-none">{category.emoji}</span>
-          <span
-            className="text-[16px] text-[#0c0b0a]"
-            style={{ fontWeight: 500, lineHeight: "20px" }}
+    <div className="flex flex-col gap-[16px] items-start justify-center p-[16px] relative w-[497px]">
+      <div
+        className="absolute bg-white inset-0 rounded-[16px]"
+        style={{ border: "1px solid rgba(12,11,10,0.08)" }}
+      />
+      {/* Header row: name+desc on left, chip on right */}
+      <div className="flex items-center justify-between relative w-full">
+        <div className="flex flex-1 flex-col gap-[5px] items-start min-w-0">
+          <p
+            className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] w-full"
+            style={{ fontWeight: 500 }}
           >
-            {category.name}
-          </span>
+            {category.emoji} {category.name}
+          </p>
+          {category.claimedDescription && (
+            <p className="text-[14px] text-[rgba(12,11,10,0.8)] leading-[20px] w-full">
+              {category.claimedDescription}
+            </p>
+          )}
         </div>
         {category.claimedAmount !== undefined && (
           <span
-            className="inline-flex items-center px-3 text-[13px] rounded-full whitespace-nowrap"
-            style={{
-              height: 28,
-              background: "rgba(160,215,102,0.2)",
-              color: "#36893b",
-              fontWeight: 600,
-            }}
+            className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap ml-3 shrink-0"
+            style={{ background: "#f4f1f1", color: "rgba(12,11,10,0.8)" }}
           >
             {fmt(category.claimedAmount)}
           </span>
         )}
       </div>
-
-      {/* Description */}
-      {category.claimedDescription && (
-        <p
-          className="text-[14px] text-[rgba(12,11,10,0.8)]"
-          style={{ lineHeight: "20px" }}
-        >
-          {category.claimedDescription}
-        </p>
-      )}
-
       {/* Advice box */}
       {category.adviceText && (
         <div
-          className="flex flex-col"
-          style={{
-            background: "#f9f7f5",
-            borderRadius: 12,
-            padding: 14,
-            gap: 4,
-          }}
+          className="bg-[#f9f7f5] flex flex-col p-[14px] rounded-[12px] w-full"
+          style={{ gap: 2 }}
         >
-          <p
-            className="flex items-center gap-1.5 text-[14px] text-[#0c0b0a]"
-            style={{ fontWeight: 700, lineHeight: "20px" }}
-          >
-            <span>⚡</span> Advice
-          </p>
-          <p
-            className="text-[14px] text-[rgba(12,11,10,0.8)]"
-            style={{ lineHeight: "20px" }}
-          >
+          <div className="flex gap-[6px] items-start">
+            <span className="text-[20px] leading-[20px] shrink-0">⚡</span>
+            <p
+              className="text-[14px] text-[#0c0b0a] leading-[20px]"
+              style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
+            >
+              Advice
+            </p>
+          </div>
+          <p className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
             {category.adviceText}
           </p>
         </div>
@@ -154,67 +138,45 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
 }
 
 function CanImproveCard({ category }: { category: ExpenseCategory }) {
-  const total =
-    category.deductions?.reduce((sum, d) => sum + d.estimatedAmount, 0) ?? 0;
   return (
-    <div
-      className="bg-white flex flex-col"
-      style={{ borderRadius: 16, padding: 16, gap: 12, border: "1px solid rgba(12,11,10,0.08)" }}
-    >
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <span className="text-2xl leading-none">{category.emoji}</span>
-        <span
-          className="text-[16px] text-[#0c0b0a]"
-          style={{ fontWeight: 500, lineHeight: "20px" }}
+    <div className="flex flex-col gap-[12px] items-start justify-center p-[16px] relative w-[497px]">
+      <div
+        className="absolute bg-white inset-0 rounded-[16px]"
+        style={{ border: "1px solid rgba(12,11,10,0.08)" }}
+      />
+      {/* Header — no chip */}
+      <div className="flex items-center relative w-full">
+        <p
+          className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] w-full"
+          style={{ fontWeight: 500 }}
         >
-          {category.name}
-        </span>
-        {total > 0 && (
-          <span
-            className="ml-auto inline-flex items-center px-3 text-[13px] rounded-full whitespace-nowrap"
-            style={{
-              height: 28,
-              background: "#ffefd3",
-              color: "#a05a00",
-              fontWeight: 600,
-            }}
-          >
-            ~{fmt(total)}
-          </span>
-        )}
+          {category.emoji} {category.name}
+        </p>
       </div>
-
       {/* Deductions box */}
       {category.deductions && category.deductions.length > 0 && (
         <div
-          className="flex flex-col"
-          style={{ background: "#ffefd3", borderRadius: 12, padding: 14, gap: 8 }}
+          className="bg-[#ffefd3] flex flex-col p-[14px] rounded-[12px] w-full"
+          style={{ gap: 8 }}
         >
-          <p
-            className="flex items-center gap-1.5 text-[14px] text-[#0c0b0a]"
-            style={{ fontWeight: 700, lineHeight: "20px" }}
-          >
-            <span>❓</span> What you can deduct?
-          </p>
+          <div className="flex gap-[6px] items-start">
+            <span className="text-[20px] leading-[20px] shrink-0">❓</span>
+            <p
+              className="text-[14px] text-[#0c0b0a] leading-[20px]"
+              style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
+            >
+              What you can deduct?
+            </p>
+          </div>
           <div className="flex flex-col" style={{ gap: 8 }}>
             {category.deductions.map((d, i) => (
-              <div key={i} className="flex items-center justify-between gap-2">
-                <span
-                  className="text-[14px] text-[rgba(12,11,10,0.8)]"
-                  style={{ lineHeight: "20px" }}
-                >
+              <div key={i} className="flex items-center justify-between w-full">
+                <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5] whitespace-nowrap">
                   {d.description}
                 </span>
                 <span
-                  className="inline-flex items-center px-2 text-[12px] rounded-full whitespace-nowrap flex-shrink-0"
-                  style={{
-                    height: 24,
-                    background: "white",
-                    color: "#a05a00",
-                    fontWeight: 600,
-                    border: "1px solid #f0d090",
-                  }}
+                  className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap ml-3 shrink-0"
+                  style={{ background: "white", color: "rgba(12,11,10,0.8)" }}
                 >
                   ~{fmt(d.estimatedAmount)}
                 </span>
@@ -256,10 +218,10 @@ export default function ResultsPage() {
     <div className="min-h-screen bg-white flex flex-col">
       {/* App bar */}
       <header
-        className="sticky top-0 z-20 bg-white flex items-center justify-center px-10"
+        className="sticky top-0 z-20 bg-white flex items-center justify-center px-[64px]"
         style={{
           height: 75,
-          boxShadow: "0px 2px 4px rgba(0,0,0,0.08), 0px 0px 2px rgba(0,0,0,0.08)",
+          boxShadow: "0px 0px 2px 0px rgba(0,0,0,0.08), 2px 4px 16px 0px rgba(0,0,0,0.08)",
         }}
       >
         <img src={LOGO} alt="Taxfix" className="h-[27px] w-[96px] object-contain" />
@@ -270,23 +232,18 @@ export default function ResultsPage() {
         {/* White header section */}
         <div
           className="flex flex-col items-center text-center px-6"
-          style={{ paddingTop: 32, paddingBottom: 32, gap: 8 }}
+          style={{ paddingTop: 32, paddingBottom: 32, gap: 6 }}
         >
-          <p
-            className="uppercase tracking-widest text-[#36893b] text-[12px]"
-            style={{ fontWeight: 400, letterSpacing: "0.1em" }}
-          >
-            Your tax return {analysis.taxYear}
+          <p className="text-[12px] text-[#36893b] text-center" style={{ fontWeight: 400 }}>
+            YOUR TAX RETURN {analysis.taxYear}
           </p>
-          <h1
-            className="text-[30px] text-[#0c0b0a]"
-            style={{ fontWeight: 700, lineHeight: "1.2", maxWidth: 600 }}
-          >
+          <h1 className="text-[30px] text-black" style={{ fontWeight: 700, lineHeight: 1.2 }}>
             You could have claimed{" "}
-            <span style={{ color: "#36893b" }}>{fmt(analysis.totalMissedDeductions)}</span> more
+            <span style={{ color: "#36893b" }}>{fmt(analysis.totalMissedDeductions)}</span>
+            {" "}more
           </h1>
           {analysis.businessType && (
-            <p className="text-[14px] text-[rgba(12,11,10,0.6)]">
+            <p className="text-[14px] text-[rgba(12,11,10,0.6)] leading-[1.3] text-center">
               {analysis.incomeType} · {analysis.businessType}
             </p>
           )}
@@ -303,7 +260,6 @@ export default function ResultsPage() {
             paddingBottom: 32,
           }}
         >
-          {/* Two column layout */}
           <div
             className="flex flex-col xl:flex-row xl:items-start mx-auto"
             style={{ gap: 53, maxWidth: 1051 }}
@@ -312,19 +268,14 @@ export default function ResultsPage() {
             <div className="flex flex-col flex-1" style={{ gap: 16 }}>
               <div className="flex items-center justify-between">
                 <h2
-                  className="text-[20px] text-[#0c0b0a]"
+                  className="text-[20px] text-black whitespace-nowrap"
                   style={{ fontWeight: 700, lineHeight: "28px", letterSpacing: "-0.2px" }}
                 >
                   What you are already expensing
                 </h2>
                 <span
-                  className="inline-flex items-center px-3 text-[13px] rounded-lg whitespace-nowrap bg-white"
-                  style={{
-                    height: 32,
-                    color: "rgba(12,11,10,0.65)",
-                    border: "1px solid rgba(12,11,10,0.1)",
-                    fontWeight: 500,
-                  }}
+                  className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white ml-3 shrink-0"
+                  style={{ color: "rgba(12,11,10,0.8)" }}
                 >
                   {analysis.alreadyClaiming.length} categories
                 </span>
@@ -340,19 +291,14 @@ export default function ResultsPage() {
             <div className="flex flex-col flex-1" style={{ gap: 16 }}>
               <div className="flex items-center justify-between">
                 <h2
-                  className="text-[20px] text-[#0c0b0a]"
+                  className="text-[20px] text-black whitespace-nowrap"
                   style={{ fontWeight: 700, lineHeight: "28px", letterSpacing: "-0.2px" }}
                 >
                   What can be improved
                 </h2>
                 <span
-                  className="inline-flex items-center px-3 text-[13px] rounded-lg whitespace-nowrap bg-white"
-                  style={{
-                    height: 32,
-                    color: "rgba(12,11,10,0.65)",
-                    border: "1px solid rgba(12,11,10,0.1)",
-                    fontWeight: 500,
-                  }}
+                  className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white ml-3 shrink-0"
+                  style={{ color: "rgba(12,11,10,0.8)" }}
                 >
                   {analysis.canImprove.length} categories
                 </span>
@@ -367,17 +313,14 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* Sticky footer */}
+      {/* Footer */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-20 bg-white flex items-center justify-between px-10"
-        style={{
-          height: 80,
-          borderTop: "1px solid #f4f1f1",
-        }}
+        className="fixed bottom-0 left-0 right-0 z-20 bg-white"
+        style={{ height: 80, borderTop: "1px solid #f2efed" }}
       >
         <button
           onClick={() => router.push("/upload")}
-          className="flex items-center gap-2 text-[#154618] text-[16px] transition-colors hover:opacity-70"
+          className="absolute flex gap-[8px] items-center left-[39px] top-[30px] text-[#154618] text-[16px] hover:opacity-70 transition-opacity"
           style={{ fontWeight: 500 }}
         >
           <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
@@ -387,8 +330,8 @@ export default function ResultsPage() {
         </button>
         <button
           onClick={() => window.print()}
-          className="h-12 bg-[#a0d766] text-[#154618] text-[16px] rounded-[10px] hover:brightness-95 active:scale-[0.98] transition-all"
-          style={{ width: 177, fontWeight: 600 }}
+          className="absolute bg-[#a0d766] h-[48px] right-[20px] top-[16px] rounded-[10px] w-[177px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
+          style={{ fontWeight: 600 }}
         >
           Continue
         </button>

@@ -3,8 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-const LOGO = "https://www.figma.com/api/mcp/asset/3517c808-5b26-433b-ae8b-e45d365ca4c3";
-const ILLUSTRATION = "https://www.figma.com/api/mcp/asset/3aa546ad-ecf7-402b-aded-a6b33d1b5cab";
+const LOGO = "https://www.figma.com/api/mcp/asset/1e759fff-4944-494b-9206-4f0aa2188ccc";
+const ILLUSTRATION = "https://www.figma.com/api/mcp/asset/9e612669-f595-4428-ad88-9ceacf67ca90";
 
 const STAGES = [
   "Reading your return…",
@@ -58,50 +58,35 @@ export default function AnalyzingPage() {
   }, [router]);
 
   return (
-    <main className="min-h-screen bg-white relative flex flex-col">
-      {/* Logo — absolute top center */}
-      <div className="absolute top-8 left-0 right-0 flex justify-center pointer-events-none">
-        <img src={LOGO} alt="Taxfix" className="h-[27px] w-[96px] object-contain" />
+    <main className="bg-white relative min-h-screen">
+      {/* Logo */}
+      <div className="-translate-x-1/2 absolute h-[27px] left-1/2 top-[32px] w-[96px]">
+        <img alt="Taxfix" className="absolute block inset-0 max-w-none size-full" src={LOGO} />
       </div>
 
-      {/* Content centered, offset slightly below center */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center"
-        style={{ paddingTop: 39 /* 19.5px * 2 to offset center downward */ }}
-      >
-        <div className="flex flex-col items-center gap-6">
-          {/* Illustration */}
-          <img
-            src={ILLUSTRATION}
-            alt=""
-            aria-hidden
-            className="object-contain"
-            style={{ width: 256, height: 255 }}
-          />
-
-          {/* Animated text stages */}
-          <div
-            className="flex flex-col items-center text-center"
-            style={{ gap: 9 }}
-          >
-            {STAGES.map((stage, i) => {
-              const isActive = i === activeStage;
-              return (
-                <p
-                  key={stage}
-                  className="transition-all duration-700 whitespace-nowrap"
-                  style={{
-                    fontSize: isActive ? 28 : 16,
-                    fontWeight: isActive ? 700 : 400,
-                    color: isActive ? "#0c0b0a" : "rgba(12,11,10,0.4)",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {stage}
-                </p>
-              );
-            })}
-          </div>
+      {/* Content */}
+      <div className="-translate-x-1/2 -translate-y-1/2 absolute flex flex-col gap-[24px] items-center left-1/2 top-[calc(50%+19.5px)]">
+        <div className="h-[255px] relative shrink-0 w-[256px]">
+          <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={ILLUSTRATION} />
+        </div>
+        <div className="flex flex-col gap-[9px] items-center justify-center leading-[1.3] text-center whitespace-nowrap">
+          {STAGES.map((stage, i) => {
+            const isActive = i === activeStage;
+            return (
+              <p
+                key={stage}
+                className="transition-all duration-700 relative shrink-0"
+                style={{
+                  fontSize: isActive ? 28 : 16,
+                  fontWeight: isActive ? 700 : 400,
+                  color: isActive ? "#0c0b0a" : "rgba(12,11,10,0.4)",
+                  lineHeight: 1.3,
+                }}
+              >
+                {stage}
+              </p>
+            );
+          })}
         </div>
       </div>
     </main>

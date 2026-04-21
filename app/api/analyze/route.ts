@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { TaxAnalysis, UserProfile } from "@/lib/types";
 
 export const maxDuration = 60;
@@ -72,9 +72,6 @@ Available for sole traders and some partnerships:
 - Cars/goods vehicles: 45p/mile (first 10,000), 25p/mile after
 - Motorcycles: 24p/mile
 
-### Living at your business premises:
-- Calculated based on number of occupants
-
 ## Property Income (gov.uk/guidance/income-tax-when-you-rent-out-a-property)
 
 Allowable expenses for landlords:
@@ -93,11 +90,6 @@ Allowable expenses for landlords:
 
 ### Finance costs (restricted relief):
 - Mortgage interest: basic rate tax credit only (20%) — not deducted from rental income
-- Landlord loan interest similarly restricted
-
-### Capital allowances:
-- Furnished holiday let equipment
-- Replacement of domestic items in residential lettings (like-for-like replacement only)
 
 ### Property Allowance:
 - First £1,000 of property income is tax-free (property allowance)
@@ -109,7 +101,6 @@ Allowable expenses for landlords:
 - Professional development courses and certifications
 - Home office equipment (desk, chair, monitor)
 - Business books and publications
-- Client entertainment (50% may apply, check rules)
 - Professional liability insurance
 
 ### Tradespeople / Construction
@@ -163,7 +154,7 @@ interface ExpenseCategory {
 interface TaxAnalysis {
   taxYear: string; // e.g. "2024/25"
   incomeType: string; // "Self-employed", "Employment", "Property", "Mixed"
-  businessType?: string; // if self-employed, their specific business
+  businessType?: string; // if self-employed, their specific business (be specific, e.g. "Freelance graphic designer", "Sole trader plumber")
   turnover?: number; // if available from the return
   totalMissedDeductions: number; // sum of all canImprove deduction amounts
   alreadyClaiming: ExpenseCategory[]; // 2-5 categories already in the return
@@ -171,18 +162,18 @@ interface TaxAnalysis {
 }
 
 Rules:
-- Base ALL deduction amounts on HMRC guidelines provided
-- Match advice to the person's specific business type and profile
-- For self-employed: use the HMRC self-employed expense rules
+- Read the PDF carefully to identify: tax year, income source, business type, existing expenses claimed
+- Base ALL deduction amounts on HMRC guidelines and realistic averages for their business type
+- For self-employed: match canImprove categories specifically to their line of work
 - For property income: use the rental property expense rules
-- If married: consider marriage allowance and joint expenses
+- If married: consider marriage allowance
 - If homeowner: include home office deduction analysis
 - If student loan: note it's deducted at source, not in SA100 expenses
 - Keep category names concise (2-4 words)
 - Emojis must be relevant to the category
 - adviceText should be 1-2 sentences of actionable, specific advice
 - claimedDescription should briefly describe what's in the return
-- deduction descriptions should be specific and realistic
+- deduction descriptions should be specific and realistic for their business
 - totalMissedDeductions = sum of all deductions[].estimatedAmount across canImprove`;
 
 function getMockData(profile: UserProfile): TaxAnalysis {
@@ -256,16 +247,22 @@ function getMockData(profile: UserProfile): TaxAnalysis {
 }
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    // Return mock data when no API key is configured
     const body = await request.json().catch(() => ({}));
     const profile: UserProfile = body.profile || {};
     return NextResponse.json(getMockData(profile));
   }
 
-  let profile: UserProfile = { married: false, dependants: false, studentLoan: false, homeowner: false, renter: false };
+  let profile: UserProfile = {
+    married: false,
+    dependants: false,
+    studentLoan: false,
+    homeowner: false,
+    renter: false,
+  };
+
   try {
     const body = await request.json();
     const { pdfBase64, profile: bodyProfile } = body as {
@@ -273,9 +270,13 @@ export async function POST(request: NextRequest) {
       pdfName: string;
       profile: UserProfile;
     };
-    profile = bodyProfile || {};
+    profile = bodyProfile || profile;
 
-    const client = new Anthropic({ apiKey });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      systemInstruction: SYSTEM_PROMPT,
+    });
 
     const profileSummary = [
       profile.married && "married",
@@ -288,61 +289,28 @@ export async function POST(request: NextRequest) {
       .join(", ");
 
     const userContext = profileSummary
-      ? `User profile: ${profileSummary}`
+      ? `User profile: ${profileSummary}.`
       : "No additional profile information provided.";
 
-    type MessageParam = Anthropic.MessageParam;
-
-    const messages: MessageParam[] = [
+    const parts = [
+      { text: `# HMRC Expense Guidelines\n\n${HMRC_KNOWLEDGE}` },
+      ...(pdfBase64
+        ? [{ inlineData: { mimeType: "application/pdf" as const, data: pdfBase64 } }]
+        : [{ text: "No PDF provided. Generate a realistic example analysis for a freelance consultant." }]),
       {
-        role: "user",
-        content: [
-          // Cache the HMRC knowledge base as it's the same for every request
-          {
-            type: "text",
-            text: `# HMRC Expense Guidelines\n\n${HMRC_KNOWLEDGE}`,
-            cache_control: { type: "ephemeral" },
-          } as Anthropic.TextBlockParam,
-          ...(pdfBase64
-            ? [
-                {
-                  type: "document",
-                  source: {
-                    type: "base64",
-                    media_type: "application/pdf",
-                    data: pdfBase64,
-                  },
-                } as Anthropic.DocumentBlockParam,
-              ]
-            : [
-                {
-                  type: "text",
-                  text: "No PDF provided. Generate a realistic example analysis.",
-                } as Anthropic.TextBlockParam,
-              ]),
-          {
-            type: "text",
-            text: `${userContext}\n\nAnalyse this UK Self Assessment tax return and identify missed expense deductions. Return only JSON.`,
-          } as Anthropic.TextBlockParam,
-        ],
+        text: `${userContext}\n\nAnalyse this UK Self Assessment tax return. Identify the income source, business type, expenses already claimed, and all missed deductions based on HMRC rules. Return only JSON.`,
       },
     ];
 
-    const response = await client.messages.create({
-      model: "claude-opus-4-7",
-      max_tokens: 4096,
-      thinking: { type: "adaptive" },
-      system: SYSTEM_PROMPT,
-      messages,
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.2,
+      },
     });
 
-    // Extract JSON from response
-    const textBlock = response.content.find((b) => b.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
-      throw new Error("No text response from Claude");
-    }
-
-    const rawText = textBlock.text.trim();
+    const rawText = result.response.text().trim();
 
     // Strip markdown code fences if present
     const jsonStr = rawText

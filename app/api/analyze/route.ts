@@ -362,17 +362,17 @@ export async function POST(request: NextRequest) {
     };
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest", systemInstruction: SYSTEM_PROMPT });
-    const request = { contents: [{ role: "user", parts }], generationConfig };
+    const geminiRequest = { contents: [{ role: "user", parts }], generationConfig };
 
     let result;
     try {
-      result = await model.generateContent(request);
+      result = await model.generateContent(geminiRequest);
     } catch (firstErr) {
       const msg = firstErr instanceof Error ? firstErr.message : String(firstErr);
       if (msg.includes("429")) {
         console.warn("Gemini 429 on first attempt — waiting 8s then retrying once");
         await new Promise((r) => setTimeout(r, 8000));
-        result = await model.generateContent(request);
+        result = await model.generateContent(geminiRequest);
       } else {
         throw firstErr;
       }

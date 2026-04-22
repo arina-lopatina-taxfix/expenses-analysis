@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType, type Schema } from "@google/generative-ai";
 import type { TaxAnalysis, UserProfile } from "@/lib/types";
 
 export const maxDuration = 60;
@@ -246,10 +246,59 @@ function getMockData(profile: UserProfile): TaxAnalysis {
   };
 }
 
+const RESPONSE_SCHEMA: Schema = {
+  type: SchemaType.OBJECT,
+  properties: {
+    taxYear: { type: SchemaType.STRING },
+    incomeType: { type: SchemaType.STRING },
+    businessType: { type: SchemaType.STRING },
+    turnover: { type: SchemaType.NUMBER },
+    totalMissedDeductions: { type: SchemaType.NUMBER },
+    alreadyClaiming: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          emoji: { type: SchemaType.STRING },
+          name: { type: SchemaType.STRING },
+          claimedAmount: { type: SchemaType.NUMBER },
+          claimedDescription: { type: SchemaType.STRING },
+          adviceText: { type: SchemaType.STRING },
+        },
+        required: ["emoji", "name"],
+      },
+    },
+    canImprove: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          emoji: { type: SchemaType.STRING },
+          name: { type: SchemaType.STRING },
+          deductions: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                description: { type: SchemaType.STRING },
+                estimatedAmount: { type: SchemaType.NUMBER },
+              },
+              required: ["description", "estimatedAmount"],
+            },
+          },
+        },
+        required: ["emoji", "name"],
+      },
+    },
+  },
+  required: ["taxYear", "incomeType", "totalMissedDeductions", "alreadyClaiming", "canImprove"],
+};
+
 export async function POST(request: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
+    console.log("No GEMINI_API_KEY — returning mock data");
     const body = await request.json().catch(() => ({}));
     const profile: UserProfile = body.profile || {};
     return NextResponse.json(getMockData(profile));
@@ -298,7 +347,7 @@ export async function POST(request: NextRequest) {
         ? [{ inlineData: { mimeType: "application/pdf" as const, data: pdfBase64 } }]
         : [{ text: "No PDF provided. Generate a realistic example analysis for a freelance consultant." }]),
       {
-        text: `${userContext}\n\nAnalyse this UK Self Assessment tax return. Identify the income source, business type, expenses already claimed, and all missed deductions based on HMRC rules. Return only JSON.`,
+        text: `${userContext}\n\nAnalyse this UK Self Assessment tax return. Identify the income source, business type, expenses already claimed, and all missed deductions based on HMRC rules.`,
       },
     ];
 
@@ -306,22 +355,18 @@ export async function POST(request: NextRequest) {
       contents: [{ role: "user", parts }],
       generationConfig: {
         responseMimeType: "application/json",
+        responseSchema: RESPONSE_SCHEMA,
         temperature: 0.2,
       },
     });
 
     const rawText = result.response.text().trim();
+    console.log("Gemini raw response length:", rawText.length);
 
-    // Strip markdown code fences if present
-    const jsonStr = rawText
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```$/i, "")
-      .trim();
+    const analysis: TaxAnalysis = JSON.parse(rawText);
 
-    const analysis: TaxAnalysis = JSON.parse(jsonStr);
-
-    // Ensure totalMissedDeductions is computed correctly
-    if (!analysis.totalMissedDeductions) {
+    // Recompute total if model got it wrong
+    if (!analysis.totalMissedDeductions || analysis.totalMissedDeductions === 0) {
       analysis.totalMissedDeductions = analysis.canImprove.reduce(
         (sum, cat) =>
           sum + (cat.deductions?.reduce((s, d) => s + d.estimatedAmount, 0) ?? 0),
@@ -331,7 +376,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(analysis);
   } catch (error) {
-    console.error("Analysis error:", error);
+    console.error("Gemini analysis error:", error instanceof Error ? error.message : error);
     return NextResponse.json(getMockData(profile));
   }
 }

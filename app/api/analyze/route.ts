@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI, SchemaType, type Schema } from "@google/generative-ai";
-import type { TaxAnalysis, UserProfile } from "@/lib/types";
+import type { TaxAnalysis, UserProfile, ExpenseCategory } from "@/lib/types";
 
 export const maxDuration = 60;
 
@@ -132,60 +132,102 @@ Allowable expenses for landlords:
 - Room rental for consultations
 `;
 
-const SYSTEM_PROMPT = `You are a UK tax expert specialising in HMRC Self Assessment returns.
-Analyse the provided tax return PDF and user profile to identify missed expense deductions.
+const SYSTEM_PROMPT = `You are a UK tax expert specialising in HMRC Self Assessment returns. Analyse the uploaded PDF and user profile.
 
-Return ONLY valid JSON matching this exact TypeScript interface — no markdown, no explanation:
+## STEP 1 — READ THE PDF CAREFULLY
 
-interface DeductionItem {
-  description: string;
-  estimatedAmount: number; // in GBP, realistic HMRC-accepted estimate
+Look at every page of the uploaded SA100 tax return and any supplementary pages (SA103S, SA103F, SA105):
+
+**SA103S – Self-employment (short):**
+- Box 17: Total allowable expenses (if a single figure is given)
+- Box 18: Cost of goods/materials bought for resale
+- Box 19: Car, van and travel expenses
+- Box 20: Other allowable expenses (phone, office, advertising, etc.)
+
+**SA103F – Self-employment (full):**
+- Box 17: Cost of goods bought for resale
+- Box 18: Construction industry subcontractors
+- Box 19: Wages, salaries and other staff costs
+- Box 20: Car, van and travel expenses
+- Box 21: Rent, rates, power and insurance costs
+- Box 22: Repairs and renewals of property and equipment
+- Box 23: Phone, fax, stationery and other office costs
+- Box 24: Advertising and business entertainment costs
+- Box 25: Interest on bank and other loans
+- Box 26: Bank, credit card and other financial charges
+- Box 27: Irrecoverable debts written off
+- Box 28: Accountancy, legal and other professional fees
+- Box 29: Depreciation and loss or profit on sales of assets
+- Box 30: Other business expenses
+
+**SA105 – Property income:**
+- Box 5–10: Letting agent fees, legal fees, insurance, maintenance, other costs
+
+For each box that has a non-zero value, create one entry in alreadyClaiming with:
+- The category name (concise, 2–4 words)
+- The exact GBP amount from that box
+- A brief claimedDescription of what that box covers
+- An adviceText tip on how to maximise that deduction
+
+If a box is zero or blank, ignore it — do NOT include it in alreadyClaiming.
+Aim for 2–5 alreadyClaiming entries from what you actually see in the PDF.
+If no PDF is provided, generate realistic example values for a freelance consultant.
+
+## STEP 2 — IDENTIFY MISSED DEDUCTIONS
+
+Based on the income type, business type, and user profile, identify 4–6 expense categories the person is NOT claiming but could legitimately claim under HMRC rules.
+
+For EACH canImprove category you MUST provide a deductions array with EXACTLY 2–4 specific line items, each with a realistic GBP amount. Never return an empty deductions array.
+
+Tailor entirely to their business type:
+- Freelancer/consultant → software subscriptions, professional memberships, training courses, home office, marketing
+- Tradesperson → tools & equipment, workwear/PPE, van costs, materials, site safety
+- Creative/designer → design software, equipment, portfolio costs, studio rent
+- Healthcare/therapist → registration fees, supervision, CPD, indemnity insurance
+- Retailer/e-commerce → stock, packaging, platform fees, storage, payment processing
+- Property investor → letting agent fees, maintenance, insurance, mortgage interest credit
+
+Use the user profile:
+- homeowner → "Home Office" with actual-cost calculation (heating, electricity, council tax, mortgage interest proportion)
+- renter → "Home Office" with flat-rate or proportion-of-rent method
+- married → note Marriage Allowance (£1,260 transferable allowance) if one spouse earns under the Personal Allowance
+- dependants → note childcare considerations if relevant
+- student loan → do NOT include as a deduction
+
+## OUTPUT FORMAT
+
+Return ONLY valid JSON — no markdown, no explanation, no code fences.
+
+Exact structure required:
+{
+  "taxYear": "2024/25",
+  "incomeType": "Self-employed",
+  "businessType": "Freelance UX designer",
+  "turnover": 45000,
+  "totalMissedDeductions": 3500,
+  "alreadyClaiming": [
+    {
+      "emoji": "🚗",
+      "name": "Travel expenses",
+      "claimedAmount": 1240,
+      "claimedDescription": "Business mileage at 45p/mile claimed in box 19.",
+      "adviceText": "If your vehicle is primarily for business, actual costs often exceed the flat rate for high-mileage users."
+    }
+  ],
+  "canImprove": [
+    {
+      "emoji": "💻",
+      "name": "Software & tools",
+      "deductions": [
+        { "description": "Design software (Figma, Adobe CC)", "estimatedAmount": 600 },
+        { "description": "Project management tools (Notion, Slack)", "estimatedAmount": 180 },
+        { "description": "Cloud storage and backup", "estimatedAmount": 120 }
+      ]
+    }
+  ]
 }
 
-interface ExpenseCategory {
-  emoji: string;
-  name: string;
-  claimedAmount?: number;      // alreadyClaiming only: amount from the return
-  claimedDescription?: string; // alreadyClaiming only: brief description of what's in the return
-  adviceText?: string;         // alreadyClaiming only: 1-2 sentence improvement tip
-  deductions: DeductionItem[]; // canImprove only: REQUIRED — always 2-4 specific items with GBP amounts
-}
-
-interface TaxAnalysis {
-  taxYear: string;            // e.g. "2024/25"
-  incomeType: string;         // "Self-employed", "Employment", "Property", "Mixed"
-  businessType?: string;      // if self-employed, be specific: "Freelance UX designer", "Sole trader electrician"
-  turnover?: number;          // if visible in the return
-  totalMissedDeductions: number; // sum of ALL deductions[].estimatedAmount across canImprove
-  alreadyClaiming: ExpenseCategory[]; // 2-5 categories already claimed in the return
-  canImprove: ExpenseCategory[];      // 4-6 categories they are NOT claiming but should be
-}
-
-CRITICAL RULES — follow exactly:
-
-1. EVERY canImprove item MUST have a deductions array with 2-4 specific line items and realistic GBP amounts.
-   Never return a canImprove category with an empty or missing deductions array.
-
-2. Tailor canImprove entirely to the person's actual job/business from the PDF:
-   - Freelancer/consultant → software subscriptions, professional memberships, training courses, home office, marketing
-   - Tradesperson → tools & equipment, workwear/PPE, van costs, materials
-   - Creative/designer → design software, equipment, portfolio costs, studio
-   - Healthcare/therapist → registration fees, supervision, CPD, indemnity insurance
-   - Retailer/e-commerce → stock, packaging, platform fees, storage
-   - Property investor → letting agent fees, maintenance, insurance, mortgage interest credit
-
-3. Use the user profile to add relevant categories:
-   - homeowner → "Home Office" with actual-cost calculation (heating, electricity, mortgage interest proportion)
-   - renter → "Home Office" with flat-rate or proportion-of-rent method
-   - married → note Marriage Allowance (£1,260 transferable allowance) if one spouse earns under the Personal Allowance
-   - dependants → note child benefit/childcare considerations if relevant
-   - student loan → do NOT include as a deduction — it's deducted at source
-
-4. Base all GBP estimates on HMRC guidelines and realistic UK averages for their business type.
-5. Keep category names concise (2-4 words). Use relevant emojis.
-6. claimedDescription: brief factual description of what's in the return.
-7. adviceText: specific, actionable 1-2 sentence tip for improving the existing claim.
-8. totalMissedDeductions must equal the sum of all estimatedAmount values across all canImprove deductions.`;
+CRITICAL: totalMissedDeductions MUST equal the exact sum of ALL estimatedAmount values across ALL canImprove deductions arrays.`;
 
 function getMockData(profile: UserProfile): TaxAnalysis {
   const alreadyClaiming = [
@@ -257,6 +299,57 @@ function getMockData(profile: UserProfile): TaxAnalysis {
   };
 }
 
+const FALLBACK_DEDUCTIONS: Record<string, { description: string; estimatedAmount: number }[]> = {
+  default: [
+    { description: "Professional software subscriptions", estimatedAmount: 480 },
+    { description: "Professional membership fees", estimatedAmount: 300 },
+    { description: "Business books and publications", estimatedAmount: 120 },
+  ],
+  "home office": [
+    { description: "Proportion of heating and electricity", estimatedAmount: 480 },
+    { description: "Proportion of broadband costs", estimatedAmount: 240 },
+    { description: "Office furniture and equipment", estimatedAmount: 350 },
+  ],
+  "training": [
+    { description: "Online courses and certifications", estimatedAmount: 600 },
+    { description: "Professional books and journals", estimatedAmount: 154 },
+    { description: "Industry conference attendance", estimatedAmount: 250 },
+  ],
+  "equipment": [
+    { description: "Laptop or computer replacement", estimatedAmount: 1200 },
+    { description: "Monitor and peripherals", estimatedAmount: 350 },
+    { description: "Specialist tools and instruments", estimatedAmount: 280 },
+  ],
+};
+
+function getFallbackDeductions(categoryName: string) {
+  const lower = categoryName.toLowerCase();
+  if (lower.includes("home") || lower.includes("office")) return FALLBACK_DEDUCTIONS["home office"];
+  if (lower.includes("train") || lower.includes("develop") || lower.includes("course")) return FALLBACK_DEDUCTIONS["training"];
+  if (lower.includes("equip") || lower.includes("tech") || lower.includes("tool")) return FALLBACK_DEDUCTIONS["equipment"];
+  return FALLBACK_DEDUCTIONS["default"];
+}
+
+function validateAndFixAnalysis(analysis: TaxAnalysis): TaxAnalysis {
+  // Ensure every canImprove category has at least 2 deduction items
+  analysis.canImprove = analysis.canImprove.map((cat) => {
+    if (!cat.deductions || cat.deductions.length < 2) {
+      console.warn(`canImprove category "${cat.name}" had ${cat.deductions?.length ?? 0} deductions — applying fallback`);
+      return { ...cat, deductions: getFallbackDeductions(cat.name) };
+    }
+    return cat;
+  });
+
+  // Recompute totalMissedDeductions from actual deduction items
+  const computed = analysis.canImprove.reduce(
+    (sum, cat) => sum + (cat.deductions?.reduce((s, d) => s + (d.estimatedAmount || 0), 0) ?? 0),
+    0
+  );
+  analysis.totalMissedDeductions = computed;
+
+  return analysis;
+}
+
 const RESPONSE_SCHEMA: Schema = {
   type: SchemaType.OBJECT,
   properties: {
@@ -288,6 +381,7 @@ const RESPONSE_SCHEMA: Schema = {
           name: { type: SchemaType.STRING },
           deductions: {
             type: SchemaType.ARRAY,
+            minItems: 2,
             items: {
               type: SchemaType.OBJECT,
               properties: {
@@ -332,6 +426,8 @@ export async function POST(request: NextRequest) {
     };
     profile = bodyProfile || profile;
 
+    console.log("Starting Gemini analysis. PDF provided:", !!pdfBase64, "Profile:", JSON.stringify(profile));
+
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash",
@@ -358,7 +454,7 @@ export async function POST(request: NextRequest) {
         ? [{ inlineData: { mimeType: "application/pdf" as const, data: pdfBase64 } }]
         : [{ text: "No PDF provided. Generate a realistic example analysis for a freelance consultant." }]),
       {
-        text: `${userContext}\n\nAnalyse this UK Self Assessment tax return. Identify the income source, business type, expenses already claimed, and all missed deductions based on HMRC rules.`,
+        text: `${userContext}\n\nAnalyse this UK Self Assessment tax return following the two-step process in your instructions. Extract all expense boxes from the PDF for alreadyClaiming. Then identify 4-6 missed deduction categories for canImprove, each with 2-4 specific line items and GBP amounts.`,
       },
     ];
 
@@ -373,21 +469,20 @@ export async function POST(request: NextRequest) {
 
     const rawText = result.response.text().trim();
     console.log("Gemini raw response length:", rawText.length);
+    console.log("Gemini response preview:", rawText.slice(0, 500));
 
     const analysis: TaxAnalysis = JSON.parse(rawText);
 
-    // Recompute total if model got it wrong
-    if (!analysis.totalMissedDeductions || analysis.totalMissedDeductions === 0) {
-      analysis.totalMissedDeductions = analysis.canImprove.reduce(
-        (sum, cat) =>
-          sum + (cat.deductions?.reduce((s, d) => s + d.estimatedAmount, 0) ?? 0),
-        0
-      );
-    }
+    console.log("Parsed analysis — alreadyClaiming count:", analysis.alreadyClaiming?.length);
+    console.log("Parsed analysis — canImprove count:", analysis.canImprove?.length);
+    analysis.canImprove?.forEach((cat, i) => {
+      console.log(`  canImprove[${i}] "${cat.name}": ${cat.deductions?.length ?? 0} deductions`);
+    });
 
-    return NextResponse.json(analysis);
+    const fixed = validateAndFixAnalysis(analysis);
+    return NextResponse.json(fixed);
   } catch (error) {
-    console.error("Gemini analysis error:", error instanceof Error ? error.message : error);
+    console.error("Gemini analysis error:", error instanceof Error ? error.message : String(error));
     return NextResponse.json(getMockData(profile));
   }
 }

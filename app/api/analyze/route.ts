@@ -145,36 +145,47 @@ interface DeductionItem {
 interface ExpenseCategory {
   emoji: string;
   name: string;
-  claimedAmount?: number; // if already claiming, the amount from the return
-  claimedDescription?: string; // what they've already claimed
-  adviceText?: string; // improvement advice for already-claiming items
-  deductions?: DeductionItem[]; // specific deductible items for can-improve categories
+  claimedAmount?: number;      // alreadyClaiming only: amount from the return
+  claimedDescription?: string; // alreadyClaiming only: brief description of what's in the return
+  adviceText?: string;         // alreadyClaiming only: 1-2 sentence improvement tip
+  deductions: DeductionItem[]; // canImprove only: REQUIRED — always 2-4 specific items with GBP amounts
 }
 
 interface TaxAnalysis {
-  taxYear: string; // e.g. "2024/25"
-  incomeType: string; // "Self-employed", "Employment", "Property", "Mixed"
-  businessType?: string; // if self-employed, their specific business (be specific, e.g. "Freelance graphic designer", "Sole trader plumber")
-  turnover?: number; // if available from the return
-  totalMissedDeductions: number; // sum of all canImprove deduction amounts
-  alreadyClaiming: ExpenseCategory[]; // 2-5 categories already in the return
-  canImprove: ExpenseCategory[]; // 3-6 categories they're missing
+  taxYear: string;            // e.g. "2024/25"
+  incomeType: string;         // "Self-employed", "Employment", "Property", "Mixed"
+  businessType?: string;      // if self-employed, be specific: "Freelance UX designer", "Sole trader electrician"
+  turnover?: number;          // if visible in the return
+  totalMissedDeductions: number; // sum of ALL deductions[].estimatedAmount across canImprove
+  alreadyClaiming: ExpenseCategory[]; // 2-5 categories already claimed in the return
+  canImprove: ExpenseCategory[];      // 4-6 categories they are NOT claiming but should be
 }
 
-Rules:
-- Read the PDF carefully to identify: tax year, income source, business type, existing expenses claimed
-- Base ALL deduction amounts on HMRC guidelines and realistic averages for their business type
-- For self-employed: match canImprove categories specifically to their line of work
-- For property income: use the rental property expense rules
-- If married: consider marriage allowance
-- If homeowner: include home office deduction analysis
-- If student loan: note it's deducted at source, not in SA100 expenses
-- Keep category names concise (2-4 words)
-- Emojis must be relevant to the category
-- adviceText should be 1-2 sentences of actionable, specific advice
-- claimedDescription should briefly describe what's in the return
-- deduction descriptions should be specific and realistic for their business
-- totalMissedDeductions = sum of all deductions[].estimatedAmount across canImprove`;
+CRITICAL RULES — follow exactly:
+
+1. EVERY canImprove item MUST have a deductions array with 2-4 specific line items and realistic GBP amounts.
+   Never return a canImprove category with an empty or missing deductions array.
+
+2. Tailor canImprove entirely to the person's actual job/business from the PDF:
+   - Freelancer/consultant → software subscriptions, professional memberships, training courses, home office, marketing
+   - Tradesperson → tools & equipment, workwear/PPE, van costs, materials
+   - Creative/designer → design software, equipment, portfolio costs, studio
+   - Healthcare/therapist → registration fees, supervision, CPD, indemnity insurance
+   - Retailer/e-commerce → stock, packaging, platform fees, storage
+   - Property investor → letting agent fees, maintenance, insurance, mortgage interest credit
+
+3. Use the user profile to add relevant categories:
+   - homeowner → "Home Office" with actual-cost calculation (heating, electricity, mortgage interest proportion)
+   - renter → "Home Office" with flat-rate or proportion-of-rent method
+   - married → note Marriage Allowance (£1,260 transferable allowance) if one spouse earns under the Personal Allowance
+   - dependants → note child benefit/childcare considerations if relevant
+   - student loan → do NOT include as a deduction — it's deducted at source
+
+4. Base all GBP estimates on HMRC guidelines and realistic UK averages for their business type.
+5. Keep category names concise (2-4 words). Use relevant emojis.
+6. claimedDescription: brief factual description of what's in the return.
+7. adviceText: specific, actionable 1-2 sentence tip for improving the existing claim.
+8. totalMissedDeductions must equal the sum of all estimatedAmount values across all canImprove deductions.`;
 
 function getMockData(profile: UserProfile): TaxAnalysis {
   const alreadyClaiming = [
@@ -287,7 +298,7 @@ const RESPONSE_SCHEMA: Schema = {
             },
           },
         },
-        required: ["emoji", "name"],
+        required: ["emoji", "name", "deductions"],
       },
     },
   },

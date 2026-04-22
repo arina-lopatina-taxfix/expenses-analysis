@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI, createPartFromBase64, createPartFromText } from "@google/genai";
 import type { TaxAnalysis, UserProfile } from "@/lib/types";
 
 export const maxDuration = 120;
@@ -233,7 +233,7 @@ export async function POST(request: NextRequest) {
 
     console.log("Starting Gemini analysis. PDF provided:", !!pdfBase64, "Profile:", JSON.stringify(profile));
 
-    const genAI = new GoogleGenerativeAI(apiKey);
+    const ai = new GoogleGenAI({ apiKey });
 
     const profileSummary = [
       profile.married && "married",
@@ -250,49 +250,30 @@ export async function POST(request: NextRequest) {
       : "No additional profile information provided.";
 
     const parts = [
-      { text: `# HMRC Expense Guidelines\n\n${HMRC_KNOWLEDGE}` },
+      createPartFromText(`# HMRC Expense Guidelines\n\n${HMRC_KNOWLEDGE}`),
       ...(pdfBase64
-        ? [{ inlineData: { mimeType: "application/pdf" as const, data: pdfBase64 } }]
-        : [{ text: "No PDF provided. Generate realistic example entries for a freelance consultant." }]),
-      {
-        text: `${userContext}\n\nAnalyse this UK Self Assessment tax return. Extract all non-zero expense boxes into alreadyClaiming. Then identify 4-6 missed deduction categories for canImprove, each with 2-4 line items and GBP amounts.`,
-      },
+        ? [createPartFromBase64(pdfBase64, "application/pdf")]
+        : [createPartFromText("No PDF provided. Generate realistic example entries for a freelance consultant.")]),
+      createPartFromText(
+        `${userContext}\n\nAnalyse this UK Self Assessment tax return. Extract all non-zero expense boxes into alreadyClaiming. Then identify 4-6 missed deduction categories for canImprove, each with 2-4 line items and GBP amounts.`
+      ),
     ];
 
-    const generationConfig = {
-      responseMimeType: "application/json" as const,
-      temperature: 0.2,
-      maxOutputTokens: 4096,
-    };
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [{ role: "user", parts }],
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        responseMimeType: "application/json",
+        temperature: 0.2,
+        maxOutputTokens: 4096,
+      },
+    });
 
-    const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-lite"];
-    let result;
-    let lastErr: unknown;
+    const rawText = (response.text ?? "").trim();
+    console.log("Gemini response length:", rawText.length);
 
-    for (const modelName of MODELS) {
-      try {
-        console.log(`Trying model: ${modelName}`);
-        const model = genAI.getGenerativeModel({ model: modelName, systemInstruction: SYSTEM_PROMPT });
-        result = await model.generateContent({ contents: [{ role: "user", parts }], generationConfig });
-        console.log(`Success with model: ${modelName}`);
-        break;
-      } catch (err) {
-        lastErr = err;
-        const msg = err instanceof Error ? err.message : String(err);
-        if (msg.includes("429") || msg.includes("404")) {
-          console.warn(`Model ${modelName} failed (${msg.slice(0, 80)}) — trying next model`);
-          continue;
-        }
-        throw err;
-      }
-    }
-    if (!result) throw lastErr;
-
-    const rawText = result.response.text().trim();
-    const finishReason = result.response.candidates?.[0]?.finishReason;
-    console.log("Gemini finish reason:", finishReason, "Response length:", rawText.length);
-
-    if (!rawText) throw new Error(`Gemini returned empty response (finishReason: ${finishReason})`);
+    if (!rawText) throw new Error("Gemini returned empty response");
 
     const cleanText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
     const analysis: TaxAnalysis = JSON.parse(cleanText);
@@ -303,9 +284,7 @@ export async function POST(request: NextRequest) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Gemini error:", errMsg);
     console.error("Gemini error detail:", JSON.stringify(error, Object.getOwnPropertyNames(error ?? {})));
-    const userFacingError = errMsg.includes("429")
-      ? `All models rate-limited (429): gemini-2.0-flash, gemini-1.5-flash, gemini-2.0-flash-lite. Raw error: ${errMsg}`
-      : errMsg;
+    const userFacingError = errMsg;
     return NextResponse.json({ ...getMockData(profile), isExample: true, errorDetail: userFacingError });
   }
 }

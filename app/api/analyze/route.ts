@@ -265,29 +265,25 @@ export async function POST(request: NextRequest) {
       maxOutputTokens: 4096,
     };
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      systemInstruction: SYSTEM_PROMPT,
-    });
-    const geminiRequest = { contents: [{ role: "user", parts }], generationConfig };
-
+    const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-lite"];
     let result;
-    const retryDelays = [8000, 20000]; // 8s then 20s — handles per-minute RPM resets
     let lastErr: unknown;
-    for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
+
+    for (const modelName of MODELS) {
       try {
-        result = await model.generateContent(geminiRequest);
+        console.log(`Trying model: ${modelName}`);
+        const model = genAI.getGenerativeModel({ model: modelName, systemInstruction: SYSTEM_PROMPT });
+        result = await model.generateContent({ contents: [{ role: "user", parts }], generationConfig });
+        console.log(`Success with model: ${modelName}`);
         break;
       } catch (err) {
         lastErr = err;
         const msg = err instanceof Error ? err.message : String(err);
-        if (msg.includes("429") && attempt < retryDelays.length) {
-          const delay = retryDelays[attempt];
-          console.warn(`Gemini 429 on attempt ${attempt + 1} — waiting ${delay / 1000}s`);
-          await new Promise((r) => setTimeout(r, delay));
-        } else {
-          throw err;
+        if (msg.includes("429") || msg.includes("404")) {
+          console.warn(`Model ${modelName} failed (${msg.slice(0, 80)}) — trying next model`);
+          continue;
         }
+        throw err;
       }
     }
     if (!result) throw lastErr;
@@ -308,7 +304,7 @@ export async function POST(request: NextRequest) {
     console.error("Gemini error:", errMsg);
     console.error("Gemini error detail:", JSON.stringify(error, Object.getOwnPropertyNames(error ?? {})));
     const userFacingError = errMsg.includes("429")
-      ? "Gemini API rate limit (429). Check your Google Cloud project billing and RPM quota for gemini-2.0-flash."
+      ? `All models rate-limited (429): gemini-2.0-flash, gemini-1.5-flash, gemini-2.0-flash-lite. Raw error: ${errMsg}`
       : errMsg;
     return NextResponse.json({ ...getMockData(profile), isExample: true, errorDetail: userFacingError });
   }

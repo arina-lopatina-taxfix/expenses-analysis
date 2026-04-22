@@ -322,18 +322,25 @@ export async function POST(request: NextRequest) {
     const geminiRequest = { contents: [{ role: "user", parts }], generationConfig };
 
     let result;
-    try {
-      result = await model.generateContent(geminiRequest);
-    } catch (firstErr) {
-      const msg = firstErr instanceof Error ? firstErr.message : String(firstErr);
-      if (msg.includes("429")) {
-        console.warn("Gemini 429 — waiting 10s then retrying once");
-        await new Promise((r) => setTimeout(r, 10000));
+    const retryDelays = [8000, 20000]; // 8s then 20s — handles per-minute RPM resets
+    let lastErr: unknown;
+    for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
+      try {
         result = await model.generateContent(geminiRequest);
-      } else {
-        throw firstErr;
+        break;
+      } catch (err) {
+        lastErr = err;
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("429") && attempt < retryDelays.length) {
+          const delay = retryDelays[attempt];
+          console.warn(`Gemini 429 on attempt ${attempt + 1} — waiting ${delay / 1000}s`);
+          await new Promise((r) => setTimeout(r, delay));
+        } else {
+          throw err;
+        }
       }
     }
+    if (!result) throw lastErr;
 
     const rawText = result.response.text().trim();
     const finishReason = result.response.candidates?.[0]?.finishReason;
@@ -349,6 +356,9 @@ export async function POST(request: NextRequest) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Gemini error:", errMsg);
     console.error("Gemini error detail:", JSON.stringify(error, Object.getOwnPropertyNames(error ?? {})));
-    return NextResponse.json({ ...getMockData(profile), isExample: true, errorDetail: errMsg });
+    const userFacingError = errMsg.includes("429")
+      ? "Gemini API rate limit (429). Check your Google Cloud project billing and RPM quota for gemini-2.0-flash."
+      : errMsg;
+    return NextResponse.json({ ...getMockData(profile), isExample: true, errorDetail: userFacingError });
   }
 }

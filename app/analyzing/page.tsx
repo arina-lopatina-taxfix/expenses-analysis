@@ -68,7 +68,8 @@ export default function AnalyzingPage() {
     }
 
     runAnalysis();
-  }, [router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main className="bg-white relative min-h-screen">

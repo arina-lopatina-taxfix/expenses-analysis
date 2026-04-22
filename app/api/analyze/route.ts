@@ -198,6 +198,13 @@ Use the user profile:
 
 Return ONLY valid JSON — no markdown, no explanation, no code fences.
 
+STRICT LENGTH LIMITS — keep output compact:
+- name: 2–4 words, max 30 characters
+- claimedDescription: max 80 characters — factual only, no elaboration
+- adviceText: max 100 characters — 1 short sentence only
+- deduction description: max 50 characters
+- businessType: max 40 characters
+
 Exact structure required:
 {
   "taxYear": "2024/25",
@@ -208,10 +215,10 @@ Exact structure required:
   "alreadyClaiming": [
     {
       "emoji": "🚗",
-      "name": "Travel expenses",
+      "name": "Travel",
       "claimedAmount": 1240,
-      "claimedDescription": "Business mileage at 45p/mile claimed in box 19.",
-      "adviceText": "If your vehicle is primarily for business, actual costs often exceed the flat rate for high-mileage users."
+      "claimedDescription": "Business mileage at 45p/mile (box 19).",
+      "adviceText": "Actual costs may exceed the flat rate for high-mileage use."
     }
   ],
   "canImprove": [
@@ -220,7 +227,7 @@ Exact structure required:
       "name": "Software & tools",
       "deductions": [
         { "description": "Design software (Figma, Adobe CC)", "estimatedAmount": 600 },
-        { "description": "Project management tools (Notion, Slack)", "estimatedAmount": 180 },
+        { "description": "Project management (Notion, Slack)", "estimatedAmount": 180 },
         { "description": "Cloud storage and backup", "estimatedAmount": 120 }
       ]
     }
@@ -464,12 +471,15 @@ export async function POST(request: NextRequest) {
         responseMimeType: "application/json",
         responseSchema: RESPONSE_SCHEMA,
         temperature: 0.2,
+        maxOutputTokens: 2048,
       },
     });
 
     const rawText = result.response.text().trim();
     console.log("Gemini raw response length:", rawText.length);
-    console.log("Gemini response preview:", rawText.slice(0, 500));
+    console.log("Gemini finish reason:", result.response.candidates?.[0]?.finishReason);
+
+    if (!rawText) throw new Error("Gemini returned empty response");
 
     const analysis: TaxAnalysis = JSON.parse(rawText);
 

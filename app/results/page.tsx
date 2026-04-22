@@ -6,38 +6,90 @@ import type { TaxAnalysis, ExpenseCategory } from "@/lib/types";
 
 const LOGO = "https://www.figma.com/api/mcp/asset/0f54586b-884a-43e7-ba5a-46cee4829c8b";
 
+const FALLBACK_DEDUCTIONS: Record<string, { description: string; estimatedAmount: number }[]> = {
+  equipment: [
+    { description: "Laptop or computer replacement", estimatedAmount: 1200 },
+    { description: "Monitor, keyboard & peripherals", estimatedAmount: 350 },
+    { description: "Software subscriptions (annual)", estimatedAmount: 480 },
+  ],
+  training: [
+    { description: "Online courses & certifications", estimatedAmount: 600 },
+    { description: "Professional books & journals", estimatedAmount: 154 },
+    { description: "Industry conference attendance", estimatedAmount: 250 },
+  ],
+  services: [
+    { description: "Accountant / bookkeeper fees", estimatedAmount: 500 },
+    { description: "Professional membership fees", estimatedAmount: 300 },
+    { description: "Legal advice on contracts", estimatedAmount: 200 },
+  ],
+  "home office": [
+    { description: "Proportion of heating and electricity", estimatedAmount: 480 },
+    { description: "Proportion of broadband costs", estimatedAmount: 240 },
+    { description: "Office furniture and equipment", estimatedAmount: 350 },
+  ],
+  marketing: [
+    { description: "Website hosting & domain", estimatedAmount: 180 },
+    { description: "Business cards & branding materials", estimatedAmount: 120 },
+    { description: "Online advertising", estimatedAmount: 300 },
+  ],
+  default: [
+    { description: "Professional software subscriptions", estimatedAmount: 480 },
+    { description: "Professional membership fees", estimatedAmount: 300 },
+    { description: "Business publications & books", estimatedAmount: 120 },
+  ],
+};
+
+function getFallbackDeductions(name: string) {
+  const lower = name.toLowerCase();
+  if (lower.includes("equip") || lower.includes("tech") || lower.includes("tool")) return FALLBACK_DEDUCTIONS.equipment;
+  if (lower.includes("train") || lower.includes("develop") || lower.includes("course")) return FALLBACK_DEDUCTIONS.training;
+  if (lower.includes("service") || lower.includes("account") || lower.includes("legal") || lower.includes("member")) return FALLBACK_DEDUCTIONS.services;
+  if (lower.includes("home") || lower.includes("office")) return FALLBACK_DEDUCTIONS["home office"];
+  if (lower.includes("market") || lower.includes("advert") || lower.includes("brand")) return FALLBACK_DEDUCTIONS.marketing;
+  return FALLBACK_DEDUCTIONS.default;
+}
+
+function ensureDeductions(analysis: TaxAnalysis): TaxAnalysis {
+  const fixedCanImprove = analysis.canImprove.map((cat) => {
+    if (!cat.deductions || cat.deductions.length < 2) {
+      return { ...cat, deductions: getFallbackDeductions(cat.name) };
+    }
+    return cat;
+  });
+  const total = fixedCanImprove.reduce(
+    (sum, cat) => sum + (cat.deductions?.reduce((s, d) => s + (d.estimatedAmount || 0), 0) ?? 0),
+    0
+  );
+  return { ...analysis, canImprove: fixedCanImprove, totalMissedDeductions: total };
+}
+
 const MOCK_DATA: TaxAnalysis = {
   taxYear: "2024/25",
   incomeType: "Self-employed",
   businessType: "Freelance consultant",
-  totalMissedDeductions: 6034,
+  totalMissedDeductions: 4434,
+  isExample: true,
   alreadyClaiming: [
     {
       emoji: "🚗",
       name: "Vehicle expenses",
       claimedAmount: 1240,
-      claimedDescription:
-        "You've claimed mileage for business trips at the HMRC approved rate of 45p per mile.",
-      adviceText:
-        "Consider switching to actual cost method if your vehicle is used predominantly for business — it may yield a higher deduction.",
+      claimedDescription: "You've claimed mileage for business trips at the HMRC approved rate of 45p per mile.",
+      adviceText: "Consider switching to actual cost method if your vehicle is used predominantly for business — it may yield a higher deduction.",
     },
     {
       emoji: "📱",
       name: "Phone & internet",
       claimedAmount: 420,
-      claimedDescription:
-        "Business proportion of your mobile phone and broadband has been deducted.",
-      adviceText:
-        "Ensure you're using the correct business-use percentage. If your usage has increased, recalculate.",
+      claimedDescription: "Business proportion of your mobile phone and broadband has been deducted.",
+      adviceText: "Ensure you're using the correct business-use percentage. If your usage has increased, recalculate.",
     },
     {
       emoji: "🏠",
       name: "Use of home",
       claimedAmount: 312,
-      claimedDescription:
-        "You've applied the flat rate allowance for working from home.",
-      adviceText:
-        "If your home office is your primary place of business, calculating actual costs (heating, electricity, council tax proportion) often gives a larger deduction.",
+      claimedDescription: "You've applied the flat rate allowance for working from home.",
+      adviceText: "If your home office is your primary place of business, calculating actual costs (heating, electricity, council tax proportion) often gives a larger deduction.",
     },
   ],
   canImprove: [
@@ -71,8 +123,8 @@ const MOCK_DATA: TaxAnalysis = {
       emoji: "🎨",
       name: "Marketing & advertising",
       deductions: [
-        { description: "Website hosting & domain", estimatedAmount: 120 },
-        { description: "Business cards & branding", estimatedAmount: 80 },
+        { description: "Website hosting & domain", estimatedAmount: 180 },
+        { description: "Business cards & branding", estimatedAmount: 120 },
       ],
     },
   ],
@@ -89,7 +141,6 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
         className="absolute bg-white inset-0 rounded-[16px]"
         style={{ border: "1px solid rgba(12,11,10,0.08)" }}
       />
-      {/* Header row: name+desc on left, chip on right */}
       <div className="flex items-center justify-between relative w-full">
         <div className="flex flex-1 flex-col gap-[5px] items-start min-w-0">
           <p
@@ -113,7 +164,6 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
           </span>
         )}
       </div>
-      {/* Advice box */}
       {category.adviceText && (
         <div
           className="bg-[#f9f7f5] flex flex-col p-[14px] rounded-[12px] w-full"
@@ -138,13 +188,13 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
 }
 
 function CanImproveCard({ category }: { category: ExpenseCategory }) {
+  const deductions = category.deductions ?? [];
   return (
     <div className="flex flex-col gap-[12px] items-start justify-center p-[16px] relative w-[497px]">
       <div
         className="absolute bg-white inset-0 rounded-[16px]"
         style={{ border: "1px solid rgba(12,11,10,0.08)" }}
       />
-      {/* Header — no chip */}
       <div className="flex items-center relative w-full">
         <p
           className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] w-full"
@@ -153,38 +203,35 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
           {category.emoji} {category.name}
         </p>
       </div>
-      {/* Deductions box */}
-      {category.deductions && category.deductions.length > 0 && (
-        <div
-          className="bg-[#ffefd3] flex flex-col p-[14px] rounded-[12px] w-full"
-          style={{ gap: 8 }}
-        >
-          <div className="flex gap-[6px] items-start">
-            <span className="text-[20px] leading-[20px] shrink-0">❓</span>
-            <p
-              className="text-[14px] text-[#0c0b0a] leading-[20px]"
-              style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
-            >
-              What you can deduct?
-            </p>
-          </div>
-          <div className="flex flex-col" style={{ gap: 8 }}>
-            {category.deductions.map((d, i) => (
-              <div key={i} className="flex items-center justify-between w-full">
-                <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5] whitespace-nowrap">
-                  {d.description}
-                </span>
-                <span
-                  className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap ml-3 shrink-0"
-                  style={{ background: "white", color: "rgba(12,11,10,0.8)" }}
-                >
-                  ~{fmt(d.estimatedAmount)}
-                </span>
-              </div>
-            ))}
-          </div>
+      <div
+        className="bg-[#ffefd3] flex flex-col p-[14px] rounded-[12px] w-full relative"
+        style={{ gap: 8 }}
+      >
+        <div className="flex gap-[6px] items-start">
+          <span className="text-[20px] leading-[20px] shrink-0">❓</span>
+          <p
+            className="text-[14px] text-[#0c0b0a] leading-[20px]"
+            style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
+          >
+            What you can deduct
+          </p>
         </div>
-      )}
+        <div className="flex flex-col" style={{ gap: 8 }}>
+          {deductions.map((d, i) => (
+            <div key={i} className="flex items-center justify-between w-full">
+              <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
+                {d.description}
+              </span>
+              <span
+                className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap ml-3 shrink-0"
+                style={{ background: "white", color: "rgba(12,11,10,0.8)" }}
+              >
+                ~{fmt(d.estimatedAmount)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -197,12 +244,13 @@ export default function ResultsPage() {
     const stored = sessionStorage.getItem("taxAnalysis");
     if (stored) {
       try {
-        setAnalysis(JSON.parse(stored));
+        const parsed: TaxAnalysis = JSON.parse(stored);
+        setAnalysis(ensureDeductions(parsed));
       } catch {
-        setAnalysis(MOCK_DATA);
+        setAnalysis(ensureDeductions(MOCK_DATA));
       }
     } else {
-      setAnalysis(MOCK_DATA);
+      setAnalysis(ensureDeductions(MOCK_DATA));
     }
   }, []);
 

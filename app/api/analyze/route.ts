@@ -57,9 +57,30 @@ For each box with a NON-ZERO value: create one alreadyClaiming entry with emoji,
 
 If the PDF has no expense boxes filled in, or no PDF is provided, generate 2-3 realistic example entries for a freelance consultant.
 
-## STEP 2 — IDENTIFY MISSED DEDUCTIONS
+## STEP 2 — IDENTIFY MISSED DEDUCTIONS (SPECIFIC TO THIS PERSON'S EXACT WORK)
 
-Identify 4-6 expense categories NOT currently claimed but legitimately claimable. For each, provide 2-4 specific line items with GBP amounts. Tailor to the user's business type and profile.
+First, identify exactly what this person does from the PDF:
+- Self-employment: read the business description field on SA103S/SA103F. Be precise — "iOS developer" not "consultant", "private music tutor" not "self-employed", "locum NHS pharmacist" not "healthcare professional". If no description, infer from the expense pattern.
+- Property income (SA105): note number of properties, residential vs commercial, furnished vs unfurnished.
+- Multiple income types: address each one separately.
+
+Then generate 4-6 canImprove categories with deduction items HIGHLY SPECIFIC to what this person actually does. Each item description must name real tools, platforms, services, or costs relevant to their exact profession — not generic labels.
+
+SPECIFICITY EXAMPLES (use this level of detail):
+- iOS/Android developer: "Apple Developer Program membership (£79/yr)", "JetBrains IDE annual licence", "AWS/Firebase dev account", "TestFlight & App Store tools"
+- Plumber/heating engineer: "Gas Safe Register annual fee", "18th Edition wiring update course", "CHAS or Safe Contractor accreditation", "Flux, solder and consumable materials"
+- Landlord (residential): "Gas safety certificate per property (£75-£120 each)", "EPC renewal (£60-£120 each)", "Legionella risk assessment", "Smoke & CO alarm compliance check"
+- Private therapist/counsellor: "BACP annual membership (£118)", "Clinical supervision sessions", "GDPR-compliant client management software", "Professional indemnity insurance (BACP-recommended provider)"
+- Freelance graphic designer: "Adobe Creative Cloud (£600/yr)", "Figma Professional (£144/yr)", "Dribbble Pro portfolio", "Stock imagery licences"
+- GP/doctor in private practice: "GMC annual retention fee (£446)", "Medical indemnity insurance (MDU/MPS)", "CPD accredited courses", "BMA membership"
+- Sole trader builder/carpenter: "CSCS card renewal", "Public liability insurance", "Specialist tools and jigs", "Wood/materials for client samples"
+- E-commerce seller: "Amazon/eBay/Etsy platform fees (% of revenue)", "Packaging and branded materials", "Inventory storage costs", "Shopify or WooCommerce subscription"
+
+User profile adjustments:
+- homeowner → include "Home Office (actual costs)": proportion of mortgage interest, council tax, heating, electricity based on rooms and hours worked
+- renter → include "Home Office (rent proportion)": percentage of rent and bills for the workspace
+- married → note Marriage Allowance opportunity if one spouse earns under Personal Allowance (£12,570)
+- student loan → do NOT include student loan repayments as a deduction
 
 ## OUTPUT
 
@@ -68,7 +89,7 @@ Return ONLY valid JSON with this exact structure — no markdown, no code fences
 {
   "taxYear": "2024/25",
   "incomeType": "Self-employed",
-  "businessType": "Freelance consultant",
+  "businessType": "Freelance iOS developer",
   "turnover": 45000,
   "totalMissedDeductions": 3500,
   "alreadyClaiming": [
@@ -83,10 +104,11 @@ Return ONLY valid JSON with this exact structure — no markdown, no code fences
   "canImprove": [
     {
       "emoji": "💻",
-      "name": "Software & tools",
+      "name": "Dev tools & licences",
       "deductions": [
-        { "description": "Design software (Figma, Adobe CC)", "estimatedAmount": 600 },
-        { "description": "Cloud storage and backup", "estimatedAmount": 120 }
+        { "description": "Apple Developer Program (£79/yr)", "estimatedAmount": 79 },
+        { "description": "JetBrains IDE annual licence", "estimatedAmount": 180 },
+        { "description": "AWS development account costs", "estimatedAmount": 240 }
       ]
     }
   ]

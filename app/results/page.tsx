@@ -289,10 +289,8 @@ export default function ResultsPage() {
               Showing example analysis — upload your SA100 PDF for a personalised report
             </p>
             {analysis.errorDetail && (
-              <p className="text-[12px] text-[#8a6800] mt-1 opacity-75">
-                {analysis.errorDetail.includes("429") || analysis.errorDetail.includes("exhausted") || analysis.errorDetail.includes("quota")
-                  ? "AI quota reached — please wait a minute and try again, or upgrade your Gemini API plan at aistudio.google.com"
-                  : analysis.errorDetail}
+              <p className="text-[12px] text-[#8a6800] mt-1 opacity-75 font-mono break-all">
+                {analysis.errorDetail}
               </p>
             )}
           </div>

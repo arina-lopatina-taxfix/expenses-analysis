@@ -277,7 +277,7 @@ export async function POST(request: NextRequest) {
         systemInstruction: PROMPT_1,
         responseMimeType: "application/json",
         temperature: 0.1,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 8192,
       },
     });
 
@@ -320,7 +320,7 @@ Generate specific missed deduction categories for this person.`;
         systemInstruction: PROMPT_2,
         responseMimeType: "application/json",
         temperature: 0.3,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 8192,
       },
     });
 

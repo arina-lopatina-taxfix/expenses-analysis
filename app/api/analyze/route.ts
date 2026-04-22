@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI, SchemaType, type Schema } from "@google/generative-ai";
-import type { TaxAnalysis, UserProfile, ExpenseCategory } from "@/lib/types";
+import type { TaxAnalysis, UserProfile } from "@/lib/types";
 
 export const maxDuration = 60;
 
@@ -406,7 +406,7 @@ export async function POST(request: NextRequest) {
     console.log("No GEMINI_API_KEY — returning mock data");
     const body = await request.json().catch(() => ({}));
     const profile: UserProfile = body.profile || {};
-    return NextResponse.json(getMockData(profile));
+    return NextResponse.json({ ...getMockData(profile), isExample: true });
   }
 
   let profile: UserProfile = {
@@ -483,6 +483,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(fixed);
   } catch (error) {
     console.error("Gemini analysis error:", error instanceof Error ? error.message : String(error));
-    return NextResponse.json(getMockData(profile));
+    return NextResponse.json({ ...getMockData(profile), isExample: true });
   }
 }

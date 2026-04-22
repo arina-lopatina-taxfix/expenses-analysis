@@ -229,6 +229,15 @@ export default function ResultsPage() {
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
+        {/* Example data banner */}
+        {analysis.isExample && (
+          <div className="bg-[#fff8e6] border-b border-[#f5e0a0] px-6 py-2 text-center">
+            <p className="text-[13px] text-[#8a6800]">
+              Showing example analysis — upload your SA100 PDF for a personalised report
+            </p>
+          </div>
+        )}
+
         {/* White header section */}
         <div
           className="flex flex-col items-center text-center px-6"

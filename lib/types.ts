@@ -20,6 +20,8 @@ export interface TaxAnalysis {
   totalMissedDeductions: number;
   alreadyClaiming: ExpenseCategory[];
   canImprove: ExpenseCategory[];
+  isExample?: boolean;
+  errorDetail?: string;
 }
 
 export interface UserProfile {

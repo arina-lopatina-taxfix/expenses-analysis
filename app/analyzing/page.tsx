@@ -14,7 +14,7 @@ const STAGES = [
 
 export default function AnalyzingPage() {
   const router = useRouter();
-  const [activeStage, setActiveStage] = useState(1);
+  const [activeStage, setActiveStage] = useState(0);
   const hasFetched = useRef(false);
 
   useEffect(() => {
@@ -44,18 +44,32 @@ export default function AnalyzingPage() {
           }),
         });
 
-        if (!response.ok) throw new Error("Analysis failed");
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => `HTTP ${response.status}`);
+          sessionStorage.setItem("taxAnalysis", JSON.stringify({
+            isExample: true,
+            errorDetail: `Request failed (${response.status}): ${errorText.slice(0, 200)}`,
+          }));
+          router.push("/results");
+          return;
+        }
 
         const analysis = await response.json();
         sessionStorage.setItem("taxAnalysis", JSON.stringify(analysis));
         router.push("/results");
-      } catch {
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        sessionStorage.setItem("taxAnalysis", JSON.stringify({
+          isExample: true,
+          errorDetail: `Network error: ${msg}`,
+        }));
         router.push("/results");
       }
     }
 
     runAnalysis();
-  }, [router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main className="bg-white relative min-h-screen">

@@ -197,7 +197,13 @@ export default function ResultsPage() {
     const stored = sessionStorage.getItem("taxAnalysis");
     if (stored) {
       try {
-        setAnalysis(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        // Merge with MOCK_DATA if Gemini returned a partial error stub
+        if (!parsed.alreadyClaiming || !parsed.canImprove) {
+          setAnalysis({ ...MOCK_DATA, ...parsed });
+        } else {
+          setAnalysis(parsed);
+        }
       } catch {
         setAnalysis(MOCK_DATA);
       }
@@ -226,6 +232,18 @@ export default function ResultsPage() {
       >
         <img src={LOGO} alt="Taxfix" className="h-[27px] w-[96px] object-contain" />
       </header>
+
+      {/* Example data banner */}
+      {analysis.isExample && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center">
+          <p className="text-amber-800 text-[13px]">
+            ⚠️ Showing example data — your PDF was not analysed.
+            {analysis.errorDetail && (
+              <span className="block text-amber-700 text-[11px] mt-0.5 opacity-80">{analysis.errorDetail}</span>
+            )}
+          </p>
+        </div>
+      )}
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>

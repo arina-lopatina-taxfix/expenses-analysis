@@ -368,7 +368,7 @@ export async function POST(request: NextRequest) {
       maxOutputTokens: 4096,
     };
 
-    const callWithRetry = async (modelName: string, retries = 2, delayMs = 3000) => {
+    const callWithRetry = async (modelName: string, retries = 3, delayMs = 5000) => {
       const model = genAI.getGenerativeModel({ model: modelName, systemInstruction: SYSTEM_PROMPT });
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
@@ -385,17 +385,7 @@ export async function POST(request: NextRequest) {
       throw new Error("unreachable");
     };
 
-    let result;
-    try {
-      result = await callWithRetry("gemini-2.0-flash");
-    } catch (primaryError) {
-      if (isRateLimit(primaryError)) {
-        console.warn("gemini-2.0-flash rate limited after retries, falling back to gemini-1.5-flash");
-        result = await callWithRetry("gemini-1.5-flash");
-      } else {
-        throw primaryError;
-      }
-    }
+    const result = await callWithRetry("gemini-2.0-flash");
 
     const rawText = result.response.text().trim();
     console.log("Gemini raw response length:", rawText.length);

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI, SchemaType, type Schema } from "@google/generative-ai";
 import type { TaxAnalysis, UserProfile } from "@/lib/types";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const HMRC_KNOWLEDGE = `
 HMRC RATES (UK Self Assessment):
@@ -361,20 +361,37 @@ export async function POST(request: NextRequest) {
       maxOutputTokens: 4096,
     };
 
-    // Try gemini-2.0-flash first, fall back to gemini-1.5-flash on quota errors
-    async function callGemini(modelName: string) {
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    function isRateLimit(err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("exhausted") || msg.includes("quota");
+    }
+
+    async function callWithRetry(modelName: string, retries = 2, delayMs = 3000) {
       const model = genAI.getGenerativeModel({ model: modelName, systemInstruction: SYSTEM_PROMPT });
-      return model.generateContent({ contents: [{ role: "user", parts }], generationConfig });
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          return await model.generateContent({ contents: [{ role: "user", parts }], generationConfig });
+        } catch (err) {
+          if (isRateLimit(err) && attempt < retries) {
+            console.warn(`${modelName} rate limited, retrying in ${delayMs}ms (attempt ${attempt + 1}/${retries})`);
+            await sleep(delayMs * (attempt + 1));
+          } else {
+            throw err;
+          }
+        }
+      }
+      throw new Error("unreachable");
     }
 
     let result;
     try {
-      result = await callGemini("gemini-2.0-flash");
+      result = await callWithRetry("gemini-2.0-flash");
     } catch (primaryError) {
-      const msg = primaryError instanceof Error ? primaryError.message : String(primaryError);
-      if (msg.includes("429") || msg.includes("quota") || msg.includes("exhausted") || msg.includes("RESOURCE_EXHAUSTED")) {
-        console.warn("gemini-2.0-flash quota exhausted, falling back to gemini-1.5-flash");
-        result = await callGemini("gemini-1.5-flash");
+      if (isRateLimit(primaryError)) {
+        console.warn("gemini-2.0-flash rate limited after retries, falling back to gemini-1.5-flash");
+        result = await callWithRetry("gemini-1.5-flash");
       } else {
         throw primaryError;
       }

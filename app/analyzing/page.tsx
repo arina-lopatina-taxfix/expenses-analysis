@@ -44,32 +44,18 @@ export default function AnalyzingPage() {
           }),
         });
 
-        if (!response.ok) {
-          const errorText = await response.text().catch(() => `HTTP ${response.status}`);
-          sessionStorage.setItem("taxAnalysis", JSON.stringify({
-            isExample: true,
-            errorDetail: `Request failed (${response.status}): ${errorText.slice(0, 200)}`,
-          }));
-          router.push("/results");
-          return;
-        }
+        if (!response.ok) throw new Error("Analysis failed");
 
         const analysis = await response.json();
         sessionStorage.setItem("taxAnalysis", JSON.stringify(analysis));
         router.push("/results");
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        sessionStorage.setItem("taxAnalysis", JSON.stringify({
-          isExample: true,
-          errorDetail: `Network error: ${msg}`,
-        }));
+      } catch {
         router.push("/results");
       }
     }
 
     runAnalysis();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [router]);
 
   return (
     <main className="bg-white relative min-h-screen">

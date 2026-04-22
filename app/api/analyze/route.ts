@@ -299,6 +299,13 @@ const RESPONSE_SCHEMA: Schema = {
   required: ["taxYear", "incomeType", "totalMissedDeductions", "alreadyClaiming", "canImprove"],
 };
 
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+const isRateLimit = (err: unknown) => {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("exhausted") || msg.includes("quota");
+};
+
 export async function POST(request: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -361,21 +368,14 @@ export async function POST(request: NextRequest) {
       maxOutputTokens: 4096,
     };
 
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-    function isRateLimit(err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      return msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("exhausted") || msg.includes("quota");
-    }
-
-    async function callWithRetry(modelName: string, retries = 2, delayMs = 3000) {
+    const callWithRetry = async (modelName: string, retries = 2, delayMs = 3000) => {
       const model = genAI.getGenerativeModel({ model: modelName, systemInstruction: SYSTEM_PROMPT });
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
           return await model.generateContent({ contents: [{ role: "user", parts }], generationConfig });
         } catch (err) {
           if (isRateLimit(err) && attempt < retries) {
-            console.warn(`${modelName} rate limited, retrying in ${delayMs}ms (attempt ${attempt + 1}/${retries})`);
+            console.warn(`${modelName} rate limited, retrying in ${delayMs * (attempt + 1)}ms (attempt ${attempt + 1}/${retries})`);
             await sleep(delayMs * (attempt + 1));
           } else {
             throw err;
@@ -383,7 +383,7 @@ export async function POST(request: NextRequest) {
         }
       }
       throw new Error("unreachable");
-    }
+    };
 
     let result;
     try {

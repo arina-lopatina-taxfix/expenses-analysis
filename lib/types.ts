@@ -20,7 +20,8 @@ export interface TaxAnalysis {
   totalMissedDeductions: number;
   alreadyClaiming: ExpenseCategory[];
   canImprove: ExpenseCategory[];
-  isExample?: boolean; // true when no real PDF was analysed
+  isExample?: boolean;
+  errorDetail?: string;
 }
 
 export interface UserProfile {

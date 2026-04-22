@@ -245,7 +245,12 @@ export default function ResultsPage() {
     if (stored) {
       try {
         const parsed: TaxAnalysis = JSON.parse(stored);
-        setAnalysis(ensureDeductions(parsed));
+        // If the stored object is a partial error stub (no alreadyClaiming), merge with MOCK_DATA
+        if (!parsed.alreadyClaiming || !parsed.canImprove) {
+          setAnalysis(ensureDeductions({ ...MOCK_DATA, isExample: true, errorDetail: parsed.errorDetail }));
+        } else {
+          setAnalysis(ensureDeductions(parsed));
+        }
       } catch {
         setAnalysis(ensureDeductions(MOCK_DATA));
       }
@@ -277,12 +282,17 @@ export default function ResultsPage() {
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
-        {/* Example data banner */}
+        {/* Example / error banner */}
         {analysis.isExample && (
-          <div className="bg-[#fff8e6] border-b border-[#f5e0a0] px-6 py-2 text-center">
-            <p className="text-[13px] text-[#8a6800]">
+          <div className="bg-[#fff8e6] border-b border-[#f5e0a0] px-6 py-3 text-center">
+            <p className="text-[13px] text-[#8a6800] font-medium">
               Showing example analysis — upload your SA100 PDF for a personalised report
             </p>
+            {analysis.errorDetail && (
+              <p className="text-[12px] text-[#8a6800] mt-1 opacity-70 font-mono break-all">
+                {analysis.errorDetail}
+              </p>
+            )}
           </div>
         )}
 

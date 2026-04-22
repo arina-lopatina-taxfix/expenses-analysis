@@ -482,7 +482,11 @@ export async function POST(request: NextRequest) {
     const fixed = validateAndFixAnalysis(analysis);
     return NextResponse.json(fixed);
   } catch (error) {
-    console.error("Gemini analysis error:", error instanceof Error ? error.message : String(error));
-    return NextResponse.json({ ...getMockData(profile), isExample: true });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    // Log every property so Vercel function logs show the full Gemini error code
+    const errDetail = JSON.stringify(error, Object.getOwnPropertyNames(error ?? {}));
+    console.error("Gemini analysis error message:", errMsg);
+    console.error("Gemini analysis error detail:", errDetail);
+    return NextResponse.json({ ...getMockData(profile), isExample: true, errorDetail: errMsg });
   }
 }

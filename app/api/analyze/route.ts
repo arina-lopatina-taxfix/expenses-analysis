@@ -329,10 +329,6 @@ export async function POST(request: NextRequest) {
     console.log("Starting Gemini analysis. PDF provided:", !!pdfBase64, "Profile:", JSON.stringify(profile));
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      systemInstruction: SYSTEM_PROMPT,
-    });
 
     const profileSummary = [
       profile.married && "married",
@@ -358,15 +354,31 @@ export async function POST(request: NextRequest) {
       },
     ];
 
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: RESPONSE_SCHEMA,
-        temperature: 0.2,
-        maxOutputTokens: 4096,
-      },
-    });
+    const generationConfig = {
+      responseMimeType: "application/json" as const,
+      responseSchema: RESPONSE_SCHEMA,
+      temperature: 0.2,
+      maxOutputTokens: 4096,
+    };
+
+    // Try gemini-2.0-flash first, fall back to gemini-1.5-flash on quota errors
+    async function callGemini(modelName: string) {
+      const model = genAI.getGenerativeModel({ model: modelName, systemInstruction: SYSTEM_PROMPT });
+      return model.generateContent({ contents: [{ role: "user", parts }], generationConfig });
+    }
+
+    let result;
+    try {
+      result = await callGemini("gemini-2.0-flash");
+    } catch (primaryError) {
+      const msg = primaryError instanceof Error ? primaryError.message : String(primaryError);
+      if (msg.includes("429") || msg.includes("quota") || msg.includes("exhausted") || msg.includes("RESOURCE_EXHAUSTED")) {
+        console.warn("gemini-2.0-flash quota exhausted, falling back to gemini-1.5-flash");
+        result = await callGemini("gemini-1.5-flash");
+      } else {
+        throw primaryError;
+      }
+    }
 
     const rawText = result.response.text().trim();
     console.log("Gemini raw response length:", rawText.length);

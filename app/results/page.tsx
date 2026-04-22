@@ -139,50 +139,34 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
 
 function CanImproveCard({ category }: { category: ExpenseCategory }) {
   return (
-    <div className="flex flex-col gap-[12px] items-start justify-center p-[16px] relative w-[497px]">
+    <div className="flex flex-col gap-[16px] items-start p-[16px] relative w-[497px]">
       <div
         className="absolute bg-white inset-0 rounded-[16px]"
         style={{ border: "1px solid rgba(12,11,10,0.08)" }}
       />
-      {/* Header — no chip */}
-      <div className="flex items-center relative w-full">
-        <p
-          className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] w-full"
-          style={{ fontWeight: 500 }}
-        >
-          {category.emoji} {category.name}
-        </p>
-      </div>
-      {/* Deductions box */}
+      {/* Header */}
+      <p
+        className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] relative w-full"
+        style={{ fontWeight: 700 }}
+      >
+        {category.emoji} {category.name}
+      </p>
+      {/* Deductions — plain rows, no wrapper box */}
       {category.deductions && category.deductions.length > 0 && (
-        <div
-          className="bg-[#ffefd3] flex flex-col p-[14px] rounded-[12px] w-full"
-          style={{ gap: 8 }}
-        >
-          <div className="flex gap-[6px] items-start">
-            <span className="text-[20px] leading-[20px] shrink-0">❓</span>
-            <p
-              className="text-[14px] text-[#0c0b0a] leading-[20px]"
-              style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
-            >
-              What you can deduct?
-            </p>
-          </div>
-          <div className="flex flex-col" style={{ gap: 8 }}>
-            {category.deductions.map((d, i) => (
-              <div key={i} className="flex items-center justify-between w-full">
-                <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5] whitespace-nowrap">
-                  {d.description}
-                </span>
-                <span
-                  className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap ml-3 shrink-0"
-                  style={{ background: "white", color: "rgba(12,11,10,0.8)" }}
-                >
-                  ~{fmt(d.estimatedAmount)}
-                </span>
-              </div>
-            ))}
-          </div>
+        <div className="flex flex-col w-full relative" style={{ gap: 12 }}>
+          {category.deductions.map((d, i) => (
+            <div key={i} className="flex items-center justify-between w-full">
+              <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
+                {d.description}
+              </span>
+              <span
+                className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap ml-3 shrink-0"
+                style={{ background: "#f4f1f1", color: "rgba(12,11,10,0.8)" }}
+              >
+                ~{fmt(d.estimatedAmount)}
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </div>

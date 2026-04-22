@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI, SchemaType, type Schema } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { TaxAnalysis, UserProfile } from "@/lib/types";
 
 export const maxDuration = 120;
@@ -204,55 +204,6 @@ function validateAndFixAnalysis(analysis: TaxAnalysis): TaxAnalysis {
   return analysis;
 }
 
-const RESPONSE_SCHEMA: Schema = {
-  type: SchemaType.OBJECT,
-  properties: {
-    taxYear: { type: SchemaType.STRING },
-    incomeType: { type: SchemaType.STRING },
-    businessType: { type: SchemaType.STRING },
-    turnover: { type: SchemaType.NUMBER },
-    totalMissedDeductions: { type: SchemaType.NUMBER },
-    alreadyClaiming: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          emoji: { type: SchemaType.STRING },
-          name: { type: SchemaType.STRING },
-          claimedAmount: { type: SchemaType.NUMBER },
-          claimedDescription: { type: SchemaType.STRING },
-          adviceText: { type: SchemaType.STRING },
-        },
-        required: ["emoji", "name", "claimedAmount"],
-      },
-    },
-    canImprove: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          emoji: { type: SchemaType.STRING },
-          name: { type: SchemaType.STRING },
-          deductions: {
-            type: SchemaType.ARRAY,
-            minItems: 2,
-            items: {
-              type: SchemaType.OBJECT,
-              properties: {
-                description: { type: SchemaType.STRING },
-                estimatedAmount: { type: SchemaType.NUMBER },
-              },
-              required: ["description", "estimatedAmount"],
-            },
-          },
-        },
-        required: ["emoji", "name", "deductions"],
-      },
-    },
-  },
-  required: ["taxYear", "incomeType", "totalMissedDeductions", "alreadyClaiming", "canImprove"],
-};
-
 export async function POST(request: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -310,7 +261,6 @@ export async function POST(request: NextRequest) {
 
     const generationConfig = {
       responseMimeType: "application/json" as const,
-      responseSchema: RESPONSE_SCHEMA,
       temperature: 0.2,
       maxOutputTokens: 4096,
     };
@@ -348,7 +298,8 @@ export async function POST(request: NextRequest) {
 
     if (!rawText) throw new Error(`Gemini returned empty response (finishReason: ${finishReason})`);
 
-    const analysis: TaxAnalysis = JSON.parse(rawText);
+    const cleanText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+    const analysis: TaxAnalysis = JSON.parse(cleanText);
     console.log("alreadyClaiming count:", analysis.alreadyClaiming?.length, "canImprove count:", analysis.canImprove?.length);
 
     return NextResponse.json(validateAndFixAnalysis(analysis));

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI, SchemaType, type Schema } from "@google/generative-ai";
+import Anthropic from "@anthropic-ai/sdk";
 import type { TaxAnalysis, UserProfile } from "@/lib/types";
 
 export const maxDuration = 120;
@@ -39,7 +39,6 @@ Look at every page of the uploaded SA100 tax return and any supplementary pages 
 
 **SA103F – Self-employment (full):**
 - Box 17: Cost of goods bought for resale
-- Box 18: Construction industry subcontractors
 - Box 19: Wages, salaries and other staff costs
 - Box 20: Car, van and travel expenses
 - Box 21: Rent, rates, power and insurance costs
@@ -48,9 +47,7 @@ Look at every page of the uploaded SA100 tax return and any supplementary pages 
 - Box 24: Advertising and business entertainment costs
 - Box 25: Interest on bank and other loans
 - Box 26: Bank, credit card and other financial charges
-- Box 27: Irrecoverable debts written off
 - Box 28: Accountancy, legal and other professional fees
-- Box 29: Depreciation and loss or profit on sales of assets
 - Box 30: Other business expenses
 
 **SA105 – Property income:**
@@ -210,12 +207,12 @@ const FALLBACK_DEDUCTIONS: Record<string, { description: string; estimatedAmount
     { description: "Proportion of broadband costs", estimatedAmount: 240 },
     { description: "Office furniture and equipment", estimatedAmount: 350 },
   ],
-  "training": [
+  training: [
     { description: "Online courses and certifications", estimatedAmount: 600 },
     { description: "Professional books and journals", estimatedAmount: 154 },
     { description: "Industry conference attendance", estimatedAmount: 250 },
   ],
-  "equipment": [
+  equipment: [
     { description: "Laptop or computer replacement", estimatedAmount: 1200 },
     { description: "Monitor and peripherals", estimatedAmount: 350 },
     { description: "Specialist tools and instruments", estimatedAmount: 280 },
@@ -231,7 +228,6 @@ function getFallbackDeductions(categoryName: string) {
 }
 
 function validateAndFixAnalysis(analysis: TaxAnalysis): TaxAnalysis {
-  // Ensure every canImprove category has at least 2 deduction items
   analysis.canImprove = analysis.canImprove.map((cat) => {
     if (!cat.deductions || cat.deductions.length < 2) {
       console.warn(`canImprove category "${cat.name}" had ${cat.deductions?.length ?? 0} deductions — applying fallback`);
@@ -240,7 +236,6 @@ function validateAndFixAnalysis(analysis: TaxAnalysis): TaxAnalysis {
     return cat;
   });
 
-  // Recompute totalMissedDeductions from actual deduction items
   const computed = analysis.canImprove.reduce(
     (sum, cat) => sum + (cat.deductions?.reduce((s, d) => s + (d.estimatedAmount || 0), 0) ?? 0),
     0
@@ -250,60 +245,11 @@ function validateAndFixAnalysis(analysis: TaxAnalysis): TaxAnalysis {
   return analysis;
 }
 
-const RESPONSE_SCHEMA: Schema = {
-  type: SchemaType.OBJECT,
-  properties: {
-    taxYear: { type: SchemaType.STRING },
-    incomeType: { type: SchemaType.STRING },
-    businessType: { type: SchemaType.STRING },
-    turnover: { type: SchemaType.NUMBER },
-    totalMissedDeductions: { type: SchemaType.NUMBER },
-    alreadyClaiming: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          emoji: { type: SchemaType.STRING },
-          name: { type: SchemaType.STRING },
-          claimedAmount: { type: SchemaType.NUMBER },
-          claimedDescription: { type: SchemaType.STRING },
-          adviceText: { type: SchemaType.STRING },
-        },
-        required: ["emoji", "name"],
-      },
-    },
-    canImprove: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          emoji: { type: SchemaType.STRING },
-          name: { type: SchemaType.STRING },
-          deductions: {
-            type: SchemaType.ARRAY,
-            minItems: 2,
-            items: {
-              type: SchemaType.OBJECT,
-              properties: {
-                description: { type: SchemaType.STRING },
-                estimatedAmount: { type: SchemaType.NUMBER },
-              },
-              required: ["description", "estimatedAmount"],
-            },
-          },
-        },
-        required: ["emoji", "name", "deductions"],
-      },
-    },
-  },
-  required: ["taxYear", "incomeType", "totalMissedDeductions", "alreadyClaiming", "canImprove"],
-};
-
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey) {
-    console.log("No GEMINI_API_KEY — returning mock data");
+    console.log("No ANTHROPIC_API_KEY — returning mock data");
     const body = await request.json().catch(() => ({}));
     const profile: UserProfile = body.profile || {};
     return NextResponse.json({ ...getMockData(profile), isExample: true });
@@ -326,9 +272,9 @@ export async function POST(request: NextRequest) {
     };
     profile = bodyProfile || profile;
 
-    console.log("Starting Gemini analysis. PDF provided:", !!pdfBase64, "Profile:", JSON.stringify(profile));
+    console.log("Starting Claude analysis. PDF provided:", !!pdfBase64, "Profile:", JSON.stringify(profile));
 
-    const genAI = new GoogleGenerativeAI(apiKey);
+    const client = new Anthropic({ apiKey });
 
     const profileSummary = [
       profile.married && "married",
@@ -344,45 +290,51 @@ export async function POST(request: NextRequest) {
       ? `User profile: ${profileSummary}.`
       : "No additional profile information provided.";
 
-    const parts = [
-      { text: `# HMRC Expense Guidelines\n\n${HMRC_KNOWLEDGE}` },
-      ...(pdfBase64
-        ? [{ inlineData: { mimeType: "application/pdf" as const, data: pdfBase64 } }]
-        : [{ text: "No PDF provided. Generate a realistic example analysis for a freelance consultant." }]),
-      {
-        text: `${userContext}\n\nAnalyse this UK Self Assessment tax return following the two-step process in your instructions. Extract all expense boxes from the PDF for alreadyClaiming. Then identify 4-6 missed deduction categories for canImprove, each with 2-4 specific line items and GBP amounts.`,
-      },
+    type ContentBlock =
+      | { type: "text"; text: string }
+      | { type: "document"; source: { type: "base64"; media_type: "application/pdf"; data: string } };
+
+    const userContent: ContentBlock[] = [
+      { type: "text", text: `# HMRC Expense Guidelines\n\n${HMRC_KNOWLEDGE}` },
     ];
 
-    const generationConfig = {
-      responseMimeType: "application/json" as const,
-      responseSchema: RESPONSE_SCHEMA,
-      temperature: 0.2,
-      maxOutputTokens: 4096,
-    };
-
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash", systemInstruction: SYSTEM_PROMPT });
-    const geminiRequest = { contents: [{ role: "user", parts }], generationConfig };
-
-    let result;
-    try {
-      result = await model.generateContent(geminiRequest);
-    } catch (firstErr) {
-      const msg = firstErr instanceof Error ? firstErr.message : String(firstErr);
-      if (msg.includes("429")) {
-        console.warn("Gemini 429 on first attempt — waiting 8s then retrying once");
-        await new Promise((r) => setTimeout(r, 8000));
-        result = await model.generateContent(geminiRequest);
-      } else {
-        throw firstErr;
-      }
+    if (pdfBase64) {
+      userContent.push({
+        type: "document",
+        source: { type: "base64", media_type: "application/pdf", data: pdfBase64 },
+      });
+    } else {
+      userContent.push({
+        type: "text",
+        text: "No PDF provided. Generate a realistic example analysis for a freelance consultant.",
+      });
     }
 
-    const rawText = result.response.text().trim();
-    console.log("Gemini raw response length:", rawText.length);
-    console.log("Gemini finish reason:", result.response.candidates?.[0]?.finishReason);
+    userContent.push({
+      type: "text",
+      text: `${userContext}\n\nAnalyse this UK Self Assessment tax return following the two-step process in your instructions. Extract all expense boxes from the PDF for alreadyClaiming. Then identify 4-6 missed deduction categories for canImprove, each with 2-4 specific line items and GBP amounts. Return ONLY valid JSON with no markdown or code fences.`,
+    });
 
-    if (!rawText) throw new Error("Gemini returned empty response");
+    const response = await client.messages.create({
+      model: "claude-opus-4-7",
+      max_tokens: 4096,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userContent }],
+    });
+
+    console.log("Claude stop_reason:", response.stop_reason);
+    console.log("Claude usage:", JSON.stringify(response.usage));
+
+    const textBlock = response.content.find((b) => b.type === "text");
+    if (!textBlock || textBlock.type !== "text") {
+      throw new Error("Claude returned no text content");
+    }
+
+    let rawText = textBlock.text.trim();
+    console.log("Claude raw response length:", rawText.length);
+
+    // Strip markdown code fences if present
+    rawText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
 
     const analysis: TaxAnalysis = JSON.parse(rawText);
 
@@ -396,10 +348,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(fixed);
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
-    // Log every property so Vercel function logs show the full Gemini error code
     const errDetail = JSON.stringify(error, Object.getOwnPropertyNames(error ?? {}));
-    console.error("Gemini analysis error message:", errMsg);
-    console.error("Gemini analysis error detail:", errDetail);
+    console.error("Claude analysis error message:", errMsg);
+    console.error("Claude analysis error detail:", errDetail);
     return NextResponse.json({ ...getMockData(profile), isExample: true, errorDetail: errMsg });
   }
 }

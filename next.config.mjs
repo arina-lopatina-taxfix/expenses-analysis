@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ["@google/generative-ai"],
+    serverComponentsExternalPackages: ["@anthropic-ai/sdk"],
   },
 };
 

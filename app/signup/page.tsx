@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 
 const LOGO = "https://www.figma.com/api/mcp/asset/0f54586b-884a-43e7-ba5a-46cee4829c8b";
 
+type IncomeType = "self-employed" | "landlord";
+
 function FloatingInput({
   id,
   label,
@@ -34,10 +36,9 @@ function FloatingInput({
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder=""
-        className="w-full rounded-[8px] border bg-white px-[14px] pt-[22px] pb-[8px] text-[16px] text-[#0c0b0a] outline-none transition-colors"
+        className="w-full rounded-[8px] bg-white px-[14px] pt-[22px] pb-[8px] text-[16px] text-[#0c0b0a] outline-none transition-colors"
         style={{
-          borderColor: focused ? "#4C4991" : "rgba(12,11,10,0.2)",
-          borderWidth: focused ? 2 : 1,
+          border: focused ? "2px solid #4C4991" : "1px solid rgba(12,11,10,0.2)",
         }}
       />
       <label
@@ -57,14 +58,84 @@ function FloatingInput({
   );
 }
 
+function IncomeToggle({
+  value,
+  onChange,
+}: {
+  value: IncomeType;
+  onChange: (v: IncomeType) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-[8px] w-full">
+      <p className="text-[12px]" style={{ color: "rgba(12,11,10,0.45)", fontWeight: 400 }}>
+        I am *
+      </p>
+      <div
+        className="flex w-full rounded-[8px] p-[3px]"
+        style={{ background: "rgba(12,11,10,0.06)" }}
+      >
+        {(["self-employed", "landlord"] as IncomeType[]).map((opt) => {
+          const active = value === opt;
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => onChange(opt)}
+              className="flex-1 h-[36px] rounded-[6px] text-[14px] transition-all"
+              style={{
+                background: active ? "white" : "transparent",
+                color: active ? "#0c0b0a" : "rgba(12,11,10,0.5)",
+                fontWeight: active ? 600 : 400,
+                boxShadow: active ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+              }}
+            >
+              {opt === "self-employed" ? "Self-employed" : "Landlord"}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function SignUpPage() {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
+  const [incomeType, setIncomeType] = useState<IncomeType>("self-employed");
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    sessionStorage.setItem("userSignup", JSON.stringify({ firstName, email }));
+    setSubmitting(true);
+
+    // Pull enrichment data from the completed analysis if available
+    let businessType: string | undefined;
+    let totalMissedDeductions: number | undefined;
+    try {
+      const stored = sessionStorage.getItem("taxAnalysis");
+      if (stored) {
+        const analysis = JSON.parse(stored);
+        businessType = analysis.businessType;
+        totalMissedDeductions = analysis.totalMissedDeductions;
+      }
+    } catch {}
+
+    // Fire-and-forget — don't block navigation on Zapier
+    fetch("/api/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName,
+        email,
+        incomeType,
+        businessType,
+        totalMissedDeductions,
+        submittedAt: new Date().toISOString(),
+      }),
+    }).catch(() => {});
+
+    sessionStorage.setItem("userSignup", JSON.stringify({ firstName, email, incomeType }));
     router.push("/results");
   }
 
@@ -86,10 +157,7 @@ export default function SignUpPage() {
         <div className="flex flex-col gap-[30px] items-center w-full max-w-[960px]">
           {/* Heading */}
           <div className="flex flex-col gap-[6px] items-center text-center">
-            <h1
-              className="text-[30px] text-black"
-              style={{ fontWeight: 700, lineHeight: 1.2 }}
-            >
+            <h1 className="text-[30px] text-black" style={{ fontWeight: 700, lineHeight: 1.2 }}>
               Your tax summary is almost ready
             </h1>
             <p
@@ -102,7 +170,7 @@ export default function SignUpPage() {
 
           {/* Card */}
           <div
-            className="bg-white w-full flex flex-col"
+            className="bg-white w-full"
             style={{
               maxWidth: 500,
               borderRadius: 24,
@@ -126,9 +194,11 @@ export default function SignUpPage() {
                 onChange={setEmail}
                 required
               />
+              <IncomeToggle value={incomeType} onChange={setIncomeType} />
               <button
                 type="submit"
-                className="w-full h-[48px] rounded-[10px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all mt-[4px]"
+                disabled={submitting}
+                className="w-full h-[48px] rounded-[10px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all mt-[4px] disabled:opacity-60"
                 style={{ background: "#a0d766", fontWeight: 600 }}
               >
                 Get my tax summary

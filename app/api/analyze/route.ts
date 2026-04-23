@@ -97,6 +97,11 @@ PROFILE-BASED CATEGORIES — add these only if the user profile flag is YES:
 - Has dependants → add: 👶 Child Benefits & Tax-Free Childcare — understand High Income Child Benefit Charge and claim Tax-Free Childcare top-up. Deductions: ["Tax-Free Childcare (government adds 20%)", "Check High Income Child Benefit Charge threshold (£60k)"]
 - Has student loan → add: 🎓 Student Loan Planning — understand repayment thresholds to avoid overpaying. Deductions: ["Review Plan 1/2/4 repayment threshold vs your income", "Consider voluntary overpayments only if income is stable"]
 
+WORKING FROM HOME — tailor the deductions based on housing status:
+- Homeowner (owns property = YES): deductions MUST be ["Proportion of mortgage interest (home-office rooms ÷ total rooms)", "Council tax proportion (business rooms ÷ total rooms)", "Heating & electricity proportion", "Broadband — business-use share"]
+- Renter (pays rent = YES): deductions MUST be ["Proportion of rent (business room usage % of floor area)", "Heating & electricity proportion", "Broadband — business-use share", "Contents insurance — business-use proportion"]
+- Neither: deductions should be ["HMRC flat rate £6/wk (£312/yr)", "Broadband — business-use share", "Dedicated office furniture"]
+
 RULES:
 - For each selected category generate 2-4 deduction line items SPECIFIC to this person's profession — name real tools, platforms, registration bodies, courses, and services they would actually use.
 - Do NOT use generic labels like "software subscriptions" or "professional fees" — be specific (e.g. "Adobe Creative Cloud (£600/yr)", "Gas Safe Register annual fee", "GMC annual retention fee (£446)").

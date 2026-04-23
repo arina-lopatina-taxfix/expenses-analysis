@@ -50,20 +50,20 @@ export default function AnalyzingPage() {
             isExample: true,
             errorDetail: `Request failed (${response.status}): ${errorText.slice(0, 200)}`,
           }));
-          router.push("/results");
+          router.push("/signup");
           return;
         }
 
         const analysis = await response.json();
         sessionStorage.setItem("taxAnalysis", JSON.stringify(analysis));
-        router.push("/results");
+        router.push("/signup");
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         sessionStorage.setItem("taxAnalysis", JSON.stringify({
           isExample: true,
           errorDetail: `Network error: ${msg}`,
         }));
-        router.push("/results");
+        router.push("/signup");
       }
     }
 

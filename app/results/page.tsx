@@ -96,6 +96,24 @@ function recalcTotal(canImprove: ExpenseCategory[]): number {
   );
 }
 
+const FA_ICON_STYLE: React.CSSProperties = {
+  fontFamily: "'Font Awesome 7 Free'",
+  fontWeight: 400,
+  fontStyle: "normal",
+};
+
+function FaIcon({ glyph, className }: { glyph: string; className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={className ?? "shrink-0 text-[16px] leading-[20px] w-[20px] text-center inline-block"}
+      style={FA_ICON_STYLE}
+    >
+      {glyph}
+    </span>
+  );
+}
+
 function AmountChip({ text, bg = "#f4f1f1" }: { text: string; bg?: string }) {
   return (
     <span
@@ -133,7 +151,7 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
           style={{ gap: 2 }}
         >
           <div className="flex gap-[6px] items-start">
-            <span className="text-[16px] leading-[20px] shrink-0">⚡</span>
+            <FaIcon glyph={''} />
             <p
               className="text-[14px] text-[#0c0b0a] leading-[20px]"
               style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
@@ -178,7 +196,7 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
             style={{ gap: 2 }}
           >
             <div className="flex gap-[6px] items-start">
-              <span className="text-[16px] leading-[20px] shrink-0">⚡</span>
+              <FaIcon glyph={''} />
               <p
                 className="text-[14px] text-[#0c0b0a] leading-[20px]"
                 style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
@@ -202,7 +220,7 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
       {category.deductions && category.deductions.length > 0 && (
         <div className="flex flex-[1_0_0] flex-col min-w-0 relative" style={{ gap: 8 }}>
           <div className="flex gap-[6px] items-start">
-            <span className="text-[16px] leading-[20px] shrink-0">❓</span>
+            <FaIcon glyph={''} />
             <p
               className="text-[14px] text-[#0c0b0a] leading-[20px]"
               style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
@@ -384,9 +402,7 @@ export default function ResultsPage() {
           className="absolute flex gap-[8px] items-center left-[39px] top-1/2 -translate-y-1/2 text-[#154618] text-[16px] hover:opacity-70 transition-opacity"
           style={{ fontWeight: 500 }}
         >
-          <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
-            <path d="M13 16l-6-6 6-6" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <FaIcon glyph={''} className="shrink-0 text-[16px] leading-[20px] w-[20px] text-center inline-block text-[#154618]" />
           Back
         </button>
         <button

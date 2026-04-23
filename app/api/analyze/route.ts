@@ -74,43 +74,54 @@ HMRC ALLOWABLE EXPENSES (UK Self Assessment):
 - Property: letting agent fees, insurance, maintenance (not improvements), legal fees
 `;
 
-const PROMPT_2 = `You are a UK tax expert specialising in HMRC expense optimisation. Based on the person's exact profession and what they already claim, identify missed deductions they could legitimately add to their next Self Assessment return.
+const PROMPT_2 = `You are a UK tax expert specialising in HMRC expense optimisation.
 
 ${HMRC_RATES}
 
-Generate 4-6 canImprove categories. Each must have 2-4 deduction line items.
+FIXED CATEGORY LIST — use ONLY these categories (with exact emoji and name) for self-employed people. Select the ones relevant to this profession and skip any that clearly don't apply.
 
-CRITICAL: deduction descriptions must be SPECIFIC to this person's exact profession — name real tools, platforms, registration bodies, courses, and services they would actually use. Do NOT use generic labels like "software subscriptions" or "professional fees".
+1. 🏠 Working from home — proportion of heating, electricity, broadband, council tax (or flat £6/wk)
+2. 📱 Office & Phone — stationery, postage, phone bills, broadband, admin software
+3. 💻 Tech & Equipment — laptops, monitors, specialist tools, machinery, equipment
+4. 🚗 Travel — business mileage, train/bus fares, parking, overnight stays (not commuting)
+5. 🔧 Materials & Stock — goods bought for resale, raw materials, components, consumables
+6. 👔 Clothing — uniforms, protective clothing, specialist attire (not everyday wear)
+7. 📋 Professional Services — accountant, solicitor, bookkeeper, business consulting fees (accountant fees are also deductible)
+8. 🛡️ Insurance — public liability, professional indemnity, equipment cover
+9. 📚 Training — courses and qualifications to maintain or improve current skills
+10. 👥 Staff (if you have any) — wages, PAYE, subcontractor costs, employer NI contributions
+11. 🎫 Subscriptions — professional memberships, trade bodies, specialist publications
 
-SPECIFICITY REFERENCE (match this level of detail for the given profession):
-- iOS/Android developer → "Apple Developer Program (£79/yr)", "JetBrains IDE licence (£180/yr)", "AWS/Firebase dev account", "TestFlight distribution tools"
-- Plumber/gas engineer → "Gas Safe Register annual fee", "18th Edition update course", "CHAS/Safe Contractor accreditation", "Flux, solder and consumable materials"
-- Residential landlord → "Gas safety certificate per property (£75–£120 each)", "EPC renewal (£60–£120)", "Legionella risk assessment", "Smoke & CO alarm compliance"
-- Therapist/counsellor → "BACP annual membership (£118)", "Clinical supervision sessions", "GDPR-compliant practice management software", "Professional indemnity insurance"
-- Graphic/UX designer → "Adobe Creative Cloud (£600/yr)", "Figma Professional (£144/yr)", "Dribbble Pro portfolio", "Stock imagery licences"
-- GP/private doctor → "GMC annual retention fee (£446)", "Medical indemnity (MDU/MPS)", "CPD accredited courses", "BMA membership"
-- Builder/carpenter → "CSCS card renewal", "Public liability insurance", "Specialist jigs and tooling", "Sample materials for client work"
-- E-commerce seller → "Platform fees (Amazon/eBay/Etsy — % of revenue)", "Branded packaging materials", "Inventory storage", "Shopify/WooCommerce subscription"
-- Freelance writer/journalist → "Press card (NUJ membership)", "Specialist research databases", "Transcription software", "Home office dedicated space"
-- Accountant/bookkeeper → "ICAEW/ACCA annual subscription", "Practice management software", "CPD training courses", "Professional indemnity insurance"
+PROFILE-BASED CATEGORIES — add these only if the user profile flag is YES:
+- Married → add: 💍 Marriage Allowance — transfer up to £1,260 of Personal Allowance if one spouse earns under £12,570/yr. Deductions: ["Check if partner earns under £12,570 this year", "Claim backdated for up to 4 tax years"]
+- Has dependants → add: 👶 Child Benefits & Tax-Free Childcare — understand High Income Child Benefit Charge and claim Tax-Free Childcare top-up. Deductions: ["Tax-Free Childcare (government adds 20%)", "Check High Income Child Benefit Charge threshold (£60k)"]
+- Has student loan → add: 🎓 Student Loan Planning — understand repayment thresholds to avoid overpaying. Deductions: ["Review Plan 1/2/4 repayment threshold vs your income", "Consider voluntary overpayments only if income is stable"]
 
-User profile rules:
-- homeowner → add "Home Office (actual costs)" with: proportion of mortgage interest, council tax, heating, electricity
-- renter → add "Home Office (rent proportion)" with: % of rent, broadband, heating for workspace
-- married → add a Marriage Allowance category if one spouse may earn under £12,570
-- student loan → do NOT include student loan repayments
+RULES:
+- For each selected category generate 2-4 deduction line items SPECIFIC to this person's profession — name real tools, platforms, registration bodies, courses, and services they would actually use.
+- Do NOT use generic labels like "software subscriptions" or "professional fees" — be specific (e.g. "Adobe Creative Cloud (£600/yr)", "Gas Safe Register annual fee", "GMC annual retention fee (£446)").
+- Do NOT include any category the person is already claiming.
+- Do NOT include "Materials & Stock" for knowledge workers (developers, designers, writers, consultants, therapists, accountants, etc.).
+- Do NOT include "Staff" if there is no indication the person employs others.
 
-Do NOT suggest categories the person is already claiming (listed in alreadyClaimedCategories).
+SPECIFICITY REFERENCE:
+- iOS/Android developer → Tech: "Apple Developer Program (£79/yr)", "Xcode / simulator hardware"; Training: "WWDC tickets or recordings", "Udemy iOS courses"; Subscriptions: "GitHub Pro (£48/yr)", "Stack Overflow Teams"
+- Plumber/gas engineer → Materials: "Flux, solder, push-fit fittings", "Pipe insulation lagging"; Training: "Gas Safe Register annual levy", "18th Edition update course"; Insurance: "Public liability (£1M minimum)"
+- Therapist/counsellor → Professional Services: "BACP annual membership (£118)", "Clinical supervision sessions (£50–£80/session)"; Insurance: "Professional indemnity (£1M+)"; Training: "CPD accredited workshops"
+- Graphic/UX designer → Tech: "Adobe Creative Cloud (£660/yr)", "Figma Professional (£144/yr)"; Subscriptions: "Dribbble Pro portfolio", "Stock imagery licence (Shutterstock/Getty)"
+- GP/private doctor → Subscriptions: "GMC annual retention fee (£446)", "BMA membership"; Insurance: "Medical indemnity (MDU/MPS ~£1,500+/yr)"; Training: "CPD accredited courses"
+- Freelance writer/journalist → Subscriptions: "NUJ membership (press card)", "Specialist research databases"; Tech: "Transcription software (Otter.ai/Rev)", "Noise-cancelling headset"
+- Accountant/bookkeeper → Subscriptions: "ICAEW/ACCA annual subscription", "Practice management software (Xero/QuickBooks)"; Training: "CPD hours (mandatory 40/yr)"
 
 Return ONLY valid JSON, no markdown, no code fences:
 {
   "canImprove": [
     {
       "emoji": "💻",
-      "name": "Dev tools & licences",
+      "name": "Tech & Equipment",
       "deductions": [
         { "description": "Apple Developer Program (£79/yr)", "estimatedAmount": 79 },
-        { "description": "JetBrains IDE annual licence", "estimatedAmount": 180 }
+        { "description": "External monitor and peripherals", "estimatedAmount": 350 }
       ]
     }
   ]

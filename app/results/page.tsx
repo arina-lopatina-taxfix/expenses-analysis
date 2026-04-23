@@ -77,8 +77,15 @@ const MOCK_DATA: TaxAnalysis = {
 
 function fmt(n: number | string | undefined): string {
   const num = Number(n);
-  if (n == null || n === "" || isNaN(num)) return "n/a";
+  if (n == null || n === "" || isNaN(num)) return "£0";
   return `£${num.toLocaleString("en-GB")}`;
+}
+
+function recalcTotal(canImprove: ExpenseCategory[]): number {
+  return canImprove.reduce(
+    (sum, cat) => sum + (cat.deductions?.reduce((s, d) => s + (Number(d.estimatedAmount) || 0), 0) ?? 0),
+    0
+  );
 }
 
 function AmountChip({ text, bg = "#f4f1f1" }: { text: string; bg?: string }) {
@@ -196,11 +203,11 @@ export default function ResultsPage() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (!parsed.alreadyClaiming || !parsed.canImprove) {
-          setAnalysis({ ...MOCK_DATA, ...parsed });
-        } else {
-          setAnalysis(parsed);
-        }
+        const base = (!parsed.alreadyClaiming || !parsed.canImprove)
+          ? { ...MOCK_DATA, ...parsed }
+          : parsed;
+        // Always recompute total from canImprove so stale/corrupted values don't show
+        setAnalysis({ ...base, totalMissedDeductions: recalcTotal(base.canImprove ?? []) });
       } catch {
         setAnalysis(MOCK_DATA);
       }

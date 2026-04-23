@@ -93,9 +93,9 @@ CATEGORY LIST — start with these standard categories (use exact emoji and name
 11. 🎫 Subscriptions — professional memberships, trade bodies, specialist publications
 
 PROFILE-BASED CATEGORIES — add these only if the user profile flag is YES:
-- Married → add: 💍 Marriage Allowance — transfer up to £1,260 of Personal Allowance if one spouse earns under £12,570/yr. Deductions: ["Check if partner earns under £12,570 this year", "Claim backdated for up to 4 tax years"]
-- Has dependants → add: 👶 Child Benefits & Tax-Free Childcare — understand High Income Child Benefit Charge and claim Tax-Free Childcare top-up. Deductions: ["Tax-Free Childcare (government adds 20%)", "Check High Income Child Benefit Charge threshold (£60k)"]
-- Has student loan → add: 🎓 Student Loan Planning — understand repayment thresholds to avoid overpaying. Deductions: ["Review Plan 1/2/4 repayment threshold vs your income", "Consider voluntary overpayments only if income is stable"]
+- Married → add: { "emoji": "💍", "name": "Marriage Allowance", "deductions": [{ "description": "Transfer £1,260 Personal Allowance to higher-earning spouse", "estimatedAmount": 252 }, { "description": "Backdate claim up to 4 tax years", "estimatedAmount": 1008 }] }
+- Has dependants → add: { "emoji": "👶", "name": "Child Benefits & Tax-Free Childcare", "deductions": [{ "description": "Tax-Free Childcare government top-up (20% on up to £8k/yr per child)", "estimatedAmount": 2000 }, { "description": "Check High Income Child Benefit Charge threshold (£60k)", "estimatedAmount": 0 }] }
+- Has student loan → add: { "emoji": "🎓", "name": "Student Loan Planning", "deductions": [{ "description": "Review Plan 1/2/4 repayment threshold vs your income", "estimatedAmount": 0 }, { "description": "Voluntary overpayments only if income is stable and interest rate justifies it", "estimatedAmount": 0 }] }
 
 WORKING FROM HOME — tailor the deductions based on housing status:
 - Homeowner (owns property = YES): deductions MUST be ["Proportion of mortgage interest (home-office rooms ÷ total rooms)", "Council tax proportion (business rooms ÷ total rooms)", "Heating & electricity proportion", "Broadband — business-use share"]

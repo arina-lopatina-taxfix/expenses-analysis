@@ -152,7 +152,7 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
 
 function CanImproveCard({ category }: { category: ExpenseCategory }) {
   return (
-    <div className="flex gap-[16px] items-center p-[16px] relative w-full">
+    <div className="flex gap-[24px] items-center p-[16px] relative w-full">
       <div
         className="absolute bg-white inset-0 rounded-[16px]"
         style={{ border: "1px solid rgba(12,11,10,0.08)" }}
@@ -192,12 +192,15 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
           </div>
         )}
       </div>
-      {/* RIGHT: orange deductions box */}
+      {/* Vertical divider */}
       {category.deductions && category.deductions.length > 0 && (
-        <div
-          className="bg-[#ffefd3] flex flex-[1_0_0] flex-col min-w-0 p-[14px] rounded-[12px] relative"
-          style={{ gap: 8 }}
-        >
+        <div className="flex items-center self-stretch relative shrink-0">
+          <div className="w-px h-full" style={{ background: "rgba(12,11,10,0.1)" }} />
+        </div>
+      )}
+      {/* RIGHT: deductions list (no background) */}
+      {category.deductions && category.deductions.length > 0 && (
+        <div className="flex flex-[1_0_0] flex-col min-w-0 relative" style={{ gap: 8 }}>
           <div className="flex gap-[6px] items-start">
             <span className="text-[16px] leading-[20px] shrink-0">❓</span>
             <p
@@ -213,7 +216,7 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
                 <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
                   {d.description}
                 </span>
-                <AmountChip text={`~${fmt(d.estimatedAmount)}`} bg="white" />
+                <AmountChip text={`~${fmt(d.estimatedAmount)}`} />
               </div>
             ))}
           </div>

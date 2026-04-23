@@ -99,7 +99,7 @@ function recalcTotal(canImprove: ExpenseCategory[]): number {
 function AmountChip({ text, bg = "#f4f1f1" }: { text: string; bg?: string }) {
   return (
     <span
-      className="flex items-center h-[32px] px-[8px] rounded-[8px] text-[14px] whitespace-nowrap ml-3 shrink-0"
+      className="flex items-center h-[32px] px-[8px] rounded-[8px] text-[14px] whitespace-nowrap shrink-0"
       style={{ background: bg, color: "rgba(12,11,10,0.8)", fontWeight: 400 }}
     >
       {text}
@@ -109,34 +109,27 @@ function AmountChip({ text, bg = "#f4f1f1" }: { text: string; bg?: string }) {
 
 function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
   return (
-    <div className="flex flex-col gap-[16px] items-start justify-center p-[16px] relative w-full">
+    <div className="flex gap-[16px] items-center p-[16px] relative w-full">
       <div
         className="absolute bg-white inset-0 rounded-[16px]"
         style={{ border: "1px solid rgba(12,11,10,0.08)" }}
       />
-      {/* Header row: name+desc on left, chip on right */}
-      <div className="flex items-center justify-between relative w-full">
-        <div className="flex flex-1 flex-col gap-[5px] items-start min-w-0">
-          <p
-            className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] w-full"
-            style={{ fontWeight: 500 }}
-          >
-            {category.emoji} {category.name}
-          </p>
-          {category.claimedDescription && (
-            <p className="text-[14px] text-[rgba(12,11,10,0.8)] leading-[20px] w-full">
-              {category.claimedDescription}
-            </p>
-          )}
-        </div>
+      {/* LEFT: name + amount chip stacked */}
+      <div className="flex flex-[1_0_0] flex-col gap-[16px] items-start min-w-0 relative">
+        <p
+          className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] w-full"
+          style={{ fontWeight: 500 }}
+        >
+          {category.emoji} {category.name}
+        </p>
         {category.claimedAmount !== undefined && (
           <AmountChip text={fmt(category.claimedAmount)} />
         )}
       </div>
-      {/* Advice box */}
+      {/* RIGHT: advice box */}
       {category.adviceText && (
         <div
-          className="bg-[#f9f7f5] flex flex-col p-[14px] rounded-[12px] w-full relative"
+          className="bg-[#f9f7f5] flex flex-[1_0_0] flex-col min-w-0 p-[14px] rounded-[12px] relative"
           style={{ gap: 2 }}
         >
           <div className="flex gap-[6px] items-start">
@@ -159,29 +152,50 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
 
 function CanImproveCard({ category }: { category: ExpenseCategory }) {
   return (
-    <div className="flex flex-col gap-[12px] items-start justify-center p-[16px] relative w-full">
+    <div className="flex gap-[16px] items-center p-[16px] relative w-full">
       <div
         className="absolute bg-white inset-0 rounded-[16px]"
         style={{ border: "1px solid rgba(12,11,10,0.08)" }}
       />
-      {/* Header — name + optional description */}
-      <div className="flex flex-col gap-[5px] relative w-full">
-        <p
-          className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] w-full"
-          style={{ fontWeight: 500 }}
-        >
-          {category.emoji} {category.name}
-        </p>
-        {category.description && (
-          <p className="text-[14px] text-[rgba(12,11,10,0.8)] leading-[20px] w-full">
-            {category.description}
+      {/* LEFT: name + description + advice box */}
+      <div className="flex flex-[1_0_0] flex-col gap-[12px] items-start min-w-0 relative">
+        <div className="flex flex-col gap-[10px] items-start w-full">
+          <p
+            className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] w-full"
+            style={{ fontWeight: 500 }}
+          >
+            {category.emoji} {category.name}
           </p>
+          {category.description && (
+            <p className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5] w-full">
+              {category.description}
+            </p>
+          )}
+        </div>
+        {category.adviceText && (
+          <div
+            className="bg-[#f9f7f5] flex flex-col p-[14px] rounded-[12px] w-full"
+            style={{ gap: 2 }}
+          >
+            <div className="flex gap-[6px] items-start">
+              <span className="text-[16px] leading-[20px] shrink-0">⚡</span>
+              <p
+                className="text-[14px] text-[#0c0b0a] leading-[20px]"
+                style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
+              >
+                Advice
+              </p>
+            </div>
+            <p className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
+              {category.adviceText}
+            </p>
+          </div>
         )}
       </div>
-      {/* Orange deductions box */}
+      {/* RIGHT: orange deductions box */}
       {category.deductions && category.deductions.length > 0 && (
         <div
-          className="bg-[#ffefd3] flex flex-col p-[14px] rounded-[12px] w-full relative"
+          className="bg-[#ffefd3] flex flex-[1_0_0] flex-col min-w-0 p-[14px] rounded-[12px] relative"
           style={{ gap: 8 }}
         >
           <div className="flex gap-[6px] items-start">
@@ -205,26 +219,6 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
           </div>
         </div>
       )}
-      {/* Advice box */}
-      {category.adviceText && (
-        <div
-          className="bg-[#f9f7f5] flex flex-col p-[14px] rounded-[12px] w-full relative"
-          style={{ gap: 2 }}
-        >
-          <div className="flex gap-[6px] items-start">
-            <span className="text-[16px] leading-[20px] shrink-0">⚡</span>
-            <p
-              className="text-[14px] text-[#0c0b0a] leading-[20px]"
-              style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
-            >
-              Advice
-            </p>
-          </div>
-          <p className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
-            {category.adviceText}
-          </p>
-        </div>
-      )}
     </div>
   );
 }
@@ -241,7 +235,6 @@ export default function ResultsPage() {
         const base = (!parsed.alreadyClaiming || !parsed.canImprove)
           ? { ...MOCK_DATA, ...parsed }
           : parsed;
-        // Always recompute total from canImprove so stale/corrupted values don't show
         setAnalysis({ ...base, totalMissedDeductions: recalcTotal(base.canImprove ?? []) });
       } catch {
         setAnalysis(MOCK_DATA);
@@ -288,7 +281,7 @@ export default function ResultsPage() {
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
-        {/* White header section — matches Figma top-[120px] from page top (75px appbar + 45px gap) */}
+        {/* White header section */}
         <div
           className="flex flex-col items-center text-center px-6"
           style={{ paddingTop: 45, paddingBottom: 36, gap: 6 }}
@@ -314,7 +307,7 @@ export default function ResultsPage() {
           </p>
         </div>
 
-        {/* Beige content section — matches Figma top-[256px], content at top-[307px] → paddingTop 51px */}
+        {/* Beige content section */}
         <div
           className="px-4 xl:px-16"
           style={{
@@ -326,12 +319,12 @@ export default function ResultsPage() {
           }}
         >
           <div
-            className="flex flex-col xl:flex-row xl:items-start mx-auto"
-            style={{ gap: 53, maxWidth: 1051 }}
+            className="flex flex-col mx-auto"
+            style={{ gap: 48, maxWidth: 900 }}
           >
-            {/* LEFT — Already expensing */}
-            <div className="flex flex-col w-full xl:w-[499px] shrink-0" style={{ gap: 16 }}>
-              <div className="flex items-center justify-between">
+            {/* Section 1 — Already expensing */}
+            <div className="flex flex-col w-full" style={{ gap: 16 }}>
+              <div className="flex items-center justify-between w-full">
                 <h2
                   className="text-[20px] text-black whitespace-nowrap"
                   style={{ fontWeight: 700, lineHeight: "28px", letterSpacing: "-0.2px" }}
@@ -339,7 +332,7 @@ export default function ResultsPage() {
                   What you are already expensing
                 </h2>
                 <span
-                  className="flex items-center h-[32px] px-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white ml-3 shrink-0"
+                  className="flex items-center h-[32px] px-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white shrink-0"
                   style={{ color: "rgba(12,11,10,0.8)" }}
                 >
                   {analysis.alreadyClaiming.length} categories
@@ -352,9 +345,9 @@ export default function ResultsPage() {
               </div>
             </div>
 
-            {/* RIGHT — Can improve */}
-            <div className="flex flex-col w-full xl:w-[499px] shrink-0" style={{ gap: 16 }}>
-              <div className="flex items-center justify-between">
+            {/* Section 2 — Can improve */}
+            <div className="flex flex-col w-full" style={{ gap: 16 }}>
+              <div className="flex items-center justify-between w-full">
                 <h2
                   className="text-[20px] text-black whitespace-nowrap"
                   style={{ fontWeight: 700, lineHeight: "28px", letterSpacing: "-0.2px" }}
@@ -362,7 +355,7 @@ export default function ResultsPage() {
                   What can be improved
                 </h2>
                 <span
-                  className="flex items-center h-[32px] px-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white ml-3 shrink-0"
+                  className="flex items-center h-[32px] px-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white shrink-0"
                   style={{ color: "rgba(12,11,10,0.8)" }}
                 >
                   {analysis.canImprove.length} categories

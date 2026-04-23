@@ -107,7 +107,11 @@ RULES:
 - For each category write a "description": one sentence explaining what this category covers FOR THIS SPECIFIC PROFESSION (not a generic definition). Max 100 chars.
 - For each category write an "adviceText": one actionable tip to maximise this deduction for this specific person. Max 120 chars.
 - Do NOT use generic labels like "software subscriptions" or "professional fees" — be specific (e.g. "Adobe Creative Cloud (£600/yr)", "Gas Safe Register annual fee", "GMC annual retention fee (£446)").
-- The "already claimed expenses" list uses HMRC box names (e.g. "Office supplies", "Rent, rates, power") — these are NOT the same as the standard categories above. A person claiming "Office supplies (SA103F Box 23)" has NOT necessarily claimed "📱 Office & Phone" or "💻 Tech & Equipment". Only skip a category if the person is already claiming an expense that is IDENTICAL to what that category would add.
+- DEDUPLICATION IS CRITICAL. Before adding any canImprove category, check whether it covers substantially the same expense area as something already claimed. Use SEMANTIC matching — ignore exact wording differences. Examples of what counts as the same:
+  • "Phone & office costs" = "Office & Phone" = "📱 Office & Phone" → SKIP canImprove
+  • "Vehicle expenses" = "Car and travel" = "🚗 Travel" → SKIP canImprove
+  • "Use of home" = "Home office" = "🏠 Working from home" → SKIP canImprove
+  If there is meaningful overlap, do NOT include that category in canImprove — even if the names are not identical.
 - IMPORTANT: Always return at least 4 canImprove categories. Never return an empty list — if in doubt, include the category with relevant deductions the person might have missed.
 - Do NOT include "Materials & Stock" for knowledge workers (developers, designers, writers, consultants, therapists, accountants, etc.).
 - Do NOT include "Staff" if there is no indication the person employs others.
@@ -321,12 +325,17 @@ export async function POST(request: NextRequest) {
       .map((c) => `  - ${c.name} (£${c.claimedAmount ?? 0}): ${c.claimedDescription ?? ""}`)
       .join("\n") || "  Nothing claimed yet";
 
+    const alreadyClaimedNames = (step1.alreadyClaiming || []).map((c) => c.name).join(", ");
+
     const suggestionPrompt = `Business type: ${step1.businessType || "self-employed professional"}
 Income type: ${step1.incomeType || "Self-employed"}
 Annual turnover: ${step1.turnover ? `£${step1.turnover}` : "unknown"}
 
-Already claimed expenses:
+Already claimed expenses (detail):
 ${alreadyClaimingDetail}
+
+ALREADY CLAIMED CATEGORIES — do NOT include any canImprove category that covers substantially the same area as these:
+${alreadyClaimedNames || "none"}
 
 User profile (from their self-reported answers):
 - Married / civil partner: ${profile.married ? "YES" : "no"}
@@ -357,7 +366,18 @@ Generate specific missed deduction categories for this person. Apply all relevan
     const rawCanImprove = step2.canImprove && step2.canImprove.length > 0
       ? step2.canImprove
       : getMockData(profile).canImprove;
-    const canImprove = fixCanImprove(rawCanImprove);
+
+    // Remove any canImprove categories that substantially overlap with already-claimed ones
+    const claimedTokens = (step1.alreadyClaiming || []).flatMap((c) =>
+      c.name.toLowerCase().replace(/[^a-z0-9 ]/g, "").split(/\s+/).filter((w) => w.length > 3)
+    );
+    const deduped = rawCanImprove.filter((cat) => {
+      const catTokens = cat.name.toLowerCase().replace(/[^a-z0-9 ]/g, "").split(/\s+/).filter((w) => w.length > 3);
+      const overlap = catTokens.some((t) => claimedTokens.includes(t));
+      if (overlap) console.log(`Dedup filter removed: ${cat.name} (overlaps with already claimed)`);
+      return !overlap;
+    });
+    const canImprove = fixCanImprove(deduped.length >= 2 ? deduped : rawCanImprove);
 
     const analysis: TaxAnalysis = {
       taxYear: step1.taxYear,

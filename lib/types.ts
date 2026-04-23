@@ -6,6 +6,7 @@ export interface DeductionItem {
 export interface ExpenseCategory {
   emoji: string;
   name: string;
+  description?: string;
   claimedAmount?: number;
   claimedDescription?: string;
   adviceText?: string;

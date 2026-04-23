@@ -80,22 +80,25 @@ ${HMRC_RATES}
 
 CATEGORY LIST — start with these standard categories (use exact emoji and name). Select the ones relevant to this profession and skip any that clearly don't apply. You MAY also add extra profession-specific categories beyond this list if there are significant deductions not covered — but do NOT duplicate or rename anything already in the list or already claimed.
 
-1. 🏠 Working from home — proportion of heating, electricity, broadband, council tax (or flat £6/wk)
-2. 📱 Office & Phone — stationery, postage, phone bills, broadband, admin software
-3. 💻 Tech & Equipment — laptops, monitors, specialist tools, machinery, equipment
-4. 🚗 Travel — business mileage, train/bus fares, parking, overnight stays (not commuting)
-5. 🔧 Materials & Stock — goods bought for resale, raw materials, components, consumables
-6. 👔 Clothing — uniforms, protective clothing, specialist attire (not everyday wear)
-7. 📋 Professional Services — accountant, solicitor, bookkeeper, business consulting fees (accountant fees are also deductible)
-8. 🛡️ Insurance — public liability, professional indemnity, equipment cover
-9. 📚 Training — courses and qualifications to maintain or improve current skills
-10. 👥 Staff (if you have any) — wages, PAYE, subcontractor costs, employer NI contributions
-11. 🎫 Subscriptions — professional memberships, trade bodies, specialist publications
+1. 🏠 Working from home | "You can claim a portion of your household bills if you work from home."
+2. 📱 Office & Phone | "The everyday costs of running your admin."
+3. 💻 Tech & Equipment | "Bigger items you need to do your work."
+4. 🚗 Travel | "Costs for journeys you make for business."
+5. 🔧 Materials & Stock | "The direct costs of what you sell or make."
+6. 👔 Clothing | "Specialist clothing needed for your job."
+7. 📋 Professional Services | "Fees you pay to other professionals for your business. Accountant fees are also deductible."
+8. 🛡️ Insurance | "Policies that protect your business."
+9. 📚 Training | "Courses that help you do your current job better."
+10. 👥 Staff (if you have any) | "Costs related to hiring people."
+11. 🎫 Subscriptions | "Membership fees for professional organisations."
+
+The text after | is the "description" field to include in your JSON output verbatim.
+For any extra categories you add, write a similarly concise one-line description.
 
 PROFILE-BASED CATEGORIES — add these only if the user profile flag is YES:
-- Married → add: { "emoji": "💍", "name": "Marriage Allowance", "deductions": [{ "description": "Transfer £1,260 Personal Allowance to higher-earning spouse", "estimatedAmount": 252 }, { "description": "Backdate claim up to 4 tax years", "estimatedAmount": 1008 }] }
-- Has dependants → add: { "emoji": "👶", "name": "Child Benefits & Tax-Free Childcare", "deductions": [{ "description": "Tax-Free Childcare government top-up (20% on up to £8k/yr per child)", "estimatedAmount": 2000 }, { "description": "Check High Income Child Benefit Charge threshold (£60k)", "estimatedAmount": 0 }] }
-- Has student loan → add: { "emoji": "🎓", "name": "Student Loan Planning", "deductions": [{ "description": "Review Plan 1/2/4 repayment threshold vs your income", "estimatedAmount": 0 }, { "description": "Voluntary overpayments only if income is stable and interest rate justifies it", "estimatedAmount": 0 }] }
+- Married → add: { "emoji": "💍", "name": "Marriage Allowance", "description": "Transfer unused Personal Allowance to your spouse and cut your combined tax bill.", "deductions": [{ "description": "Transfer £1,260 Personal Allowance to higher-earning spouse", "estimatedAmount": 252 }, { "description": "Backdate claim up to 4 tax years", "estimatedAmount": 1008 }] }
+- Has dependants → add: { "emoji": "👶", "name": "Child Benefits & Tax-Free Childcare", "description": "Government schemes that top up your childcare costs and reduce your tax bill.", "deductions": [{ "description": "Tax-Free Childcare government top-up (20% on up to £8k/yr per child)", "estimatedAmount": 2000 }, { "description": "Check High Income Child Benefit Charge threshold (£60k)", "estimatedAmount": 0 }] }
+- Has student loan → add: { "emoji": "🎓", "name": "Student Loan Planning", "description": "Understanding your repayment plan can prevent unnecessary overpayments.", "deductions": [{ "description": "Review Plan 1/2/4 repayment threshold vs your income", "estimatedAmount": 0 }, { "description": "Voluntary overpayments only if income is stable and interest rate justifies it", "estimatedAmount": 0 }] }
 
 WORKING FROM HOME — tailor the deductions based on housing status:
 - Homeowner (owns property = YES): deductions MUST be ["Proportion of mortgage interest (home-office rooms ÷ total rooms)", "Council tax proportion (business rooms ÷ total rooms)", "Heating & electricity proportion", "Broadband — business-use share"]
@@ -124,6 +127,7 @@ Return ONLY valid JSON, no markdown, no code fences:
     {
       "emoji": "💻",
       "name": "Tech & Equipment",
+      "description": "Bigger items you need to do your work.",
       "deductions": [
         { "description": "Apple Developer Program (£79/yr)", "estimatedAmount": 79 },
         { "description": "External monitor and peripherals", "estimatedAmount": 350 }

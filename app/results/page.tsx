@@ -41,6 +41,7 @@ const MOCK_DATA: TaxAnalysis = {
     {
       emoji: "💻",
       name: "Tech & Equipment",
+      description: "Bigger items you need to do your work.",
       deductions: [
         { description: "Laptop / computer replacement", estimatedAmount: 1200 },
         { description: "Monitor & peripherals", estimatedAmount: 350 },
@@ -50,6 +51,7 @@ const MOCK_DATA: TaxAnalysis = {
     {
       emoji: "📚",
       name: "Training",
+      description: "Courses that help you do your current job better.",
       deductions: [
         { description: "Online courses & certifications", estimatedAmount: 800 },
         { description: "Professional books & subscriptions", estimatedAmount: 150 },
@@ -58,6 +60,7 @@ const MOCK_DATA: TaxAnalysis = {
     {
       emoji: "📋",
       name: "Professional Services",
+      description: "Fees you pay to other professionals for your business.",
       deductions: [
         { description: "Accountant fees", estimatedAmount: 600 },
         { description: "Legal advice", estimatedAmount: 300 },
@@ -67,6 +70,7 @@ const MOCK_DATA: TaxAnalysis = {
     {
       emoji: "🎨",
       name: "Marketing & advertising",
+      description: "Costs of promoting your business to clients.",
       deductions: [
         { description: "Website hosting & domain", estimatedAmount: 120 },
         { description: "Business cards & branding", estimatedAmount: 80 },
@@ -156,13 +160,20 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
         className="absolute bg-white inset-0 rounded-[16px]"
         style={{ border: "1px solid rgba(12,11,10,0.08)" }}
       />
-      {/* Header — name only, no chip */}
-      <p
-        className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] relative w-full"
-        style={{ fontWeight: 500 }}
-      >
-        {category.emoji} {category.name}
-      </p>
+      {/* Header — name + optional description */}
+      <div className="flex flex-col gap-[5px] relative w-full">
+        <p
+          className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] w-full"
+          style={{ fontWeight: 500 }}
+        >
+          {category.emoji} {category.name}
+        </p>
+        {category.description && (
+          <p className="text-[14px] text-[rgba(12,11,10,0.8)] leading-[20px] w-full">
+            {category.description}
+          </p>
+        )}
+      </div>
       {/* Orange deductions box */}
       {category.deductions && category.deductions.length > 0 && (
         <div

@@ -238,7 +238,7 @@ function fixCanImprove(canImprove: ExpenseCategory[]): ExpenseCategory[] {
 
 function sumDeductions(canImprove: ExpenseCategory[]): number {
   return canImprove.reduce(
-    (sum, cat) => sum + (cat.deductions?.reduce((s, d) => s + (d.estimatedAmount || 0), 0) ?? 0),
+    (sum, cat) => sum + (cat.deductions?.reduce((s, d) => s + (Number(d.estimatedAmount) || 0), 0) ?? 0),
     0
   );
 }

@@ -75,8 +75,10 @@ const MOCK_DATA: TaxAnalysis = {
   ],
 };
 
-function fmt(n: number) {
-  return `£${n.toLocaleString("en-GB")}`;
+function fmt(n: number | string | undefined): string {
+  const num = Number(n);
+  if (n == null || n === "" || isNaN(num)) return "n/a";
+  return `£${num.toLocaleString("en-GB")}`;
 }
 
 function AmountChip({ text, bg = "#f4f1f1" }: { text: string; bg?: string }) {

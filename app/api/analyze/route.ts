@@ -296,22 +296,25 @@ export async function POST(request: NextRequest) {
     // ── Call 2: generate profession-specific canImprove suggestions ──────────
     console.log("Call 2: generating tailored suggestions for:", step1.businessType);
 
-    const profileSummary = [
-      profile.married && "married",
-      profile.dependants && "has dependants",
-      profile.homeowner && "homeowner",
-      profile.renter && "renter",
-      profile.studentLoan && "has student loan",
-    ].filter(Boolean).join(", ") || "no additional profile info";
-
-    const alreadyClaimedCategories = (step1.alreadyClaiming || []).map((c) => c.name).join(", ");
+    const alreadyClaimingDetail = (step1.alreadyClaiming || [])
+      .map((c) => `  - ${c.name} (£${c.claimedAmount ?? 0}): ${c.claimedDescription ?? ""}`)
+      .join("\n") || "  Nothing claimed yet";
 
     const suggestionPrompt = `Business type: ${step1.businessType || "self-employed professional"}
 Income type: ${step1.incomeType || "Self-employed"}
-Already claiming: ${alreadyClaimedCategories || "nothing yet"}
-User profile: ${profileSummary}
+Annual turnover: ${step1.turnover ? `£${step1.turnover}` : "unknown"}
 
-Generate specific missed deduction categories for this person.`;
+Already claimed expenses:
+${alreadyClaimingDetail}
+
+User profile (from their self-reported answers):
+- Married / civil partner: ${profile.married ? "YES" : "no"}
+- Has dependants: ${profile.dependants ? "YES" : "no"}
+- Homeowner (owns property): ${profile.homeowner ? "YES" : "no"}
+- Renter (pays rent): ${profile.renter ? "YES" : "no"}
+- Has student loan: ${profile.studentLoan ? "YES" : "no"}
+
+Generate specific missed deduction categories for this person. Apply all relevant user profile rules from your instructions (home office for homeowners/renters, Marriage Allowance for married users, etc.).`;
 
     const call2 = await ai.models.generateContent({
       model: "gemini-2.5-flash",

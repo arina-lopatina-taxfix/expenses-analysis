@@ -41,7 +41,8 @@ const MOCK_DATA: TaxAnalysis = {
     {
       emoji: "💻",
       name: "Tech & Equipment",
-      description: "Bigger items you need to do your work.",
+      description: "Hardware and software you rely on to deliver client work.",
+      adviceText: "Buy equipment outright in one tax year to claim the full cost via the Annual Investment Allowance rather than spreading depreciation.",
       deductions: [
         { description: "Laptop / computer replacement", estimatedAmount: 1200 },
         { description: "Monitor & peripherals", estimatedAmount: 350 },
@@ -51,7 +52,8 @@ const MOCK_DATA: TaxAnalysis = {
     {
       emoji: "📚",
       name: "Training",
-      description: "Courses that help you do your current job better.",
+      description: "Courses and materials that maintain or improve your current skills.",
+      adviceText: "Only training that maintains existing skills is allowable — courses for a completely new career are not deductible.",
       deductions: [
         { description: "Online courses & certifications", estimatedAmount: 800 },
         { description: "Professional books & subscriptions", estimatedAmount: 150 },
@@ -60,7 +62,8 @@ const MOCK_DATA: TaxAnalysis = {
     {
       emoji: "📋",
       name: "Professional Services",
-      description: "Fees you pay to other professionals for your business.",
+      description: "Fees paid to accountants, solicitors and other professionals for your business.",
+      adviceText: "Your accountant's fee for preparing this Self Assessment return is itself a deductible expense — make sure it's included.",
       deductions: [
         { description: "Accountant fees", estimatedAmount: 600 },
         { description: "Legal advice", estimatedAmount: 300 },
@@ -70,7 +73,8 @@ const MOCK_DATA: TaxAnalysis = {
     {
       emoji: "🎨",
       name: "Marketing & advertising",
-      description: "Costs of promoting your business to clients.",
+      description: "Costs of promoting your services and maintaining an online presence.",
+      adviceText: "Website costs including hosting, domain renewal and any design work are all fully deductible as business expenses.",
       deductions: [
         { description: "Website hosting & domain", estimatedAmount: 120 },
         { description: "Business cards & branding", estimatedAmount: 80 },
@@ -199,6 +203,26 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
               </div>
             ))}
           </div>
+        </div>
+      )}
+      {/* Advice box */}
+      {category.adviceText && (
+        <div
+          className="bg-[#f9f7f5] flex flex-col p-[14px] rounded-[12px] w-full relative"
+          style={{ gap: 2 }}
+        >
+          <div className="flex gap-[6px] items-start">
+            <span className="text-[16px] leading-[20px] shrink-0">⚡</span>
+            <p
+              className="text-[14px] text-[#0c0b0a] leading-[20px]"
+              style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
+            >
+              Advice
+            </p>
+          </div>
+          <p className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
+            {category.adviceText}
+          </p>
         </div>
       )}
     </div>

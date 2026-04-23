@@ -80,25 +80,22 @@ ${HMRC_RATES}
 
 CATEGORY LIST — start with these standard categories (use exact emoji and name). Select the ones relevant to this profession and skip any that clearly don't apply. You MAY also add extra profession-specific categories beyond this list if there are significant deductions not covered — but do NOT duplicate or rename anything already in the list or already claimed.
 
-1. 🏠 Working from home | "You can claim a portion of your household bills if you work from home."
-2. 📱 Office & Phone | "The everyday costs of running your admin."
-3. 💻 Tech & Equipment | "Bigger items you need to do your work."
-4. 🚗 Travel | "Costs for journeys you make for business."
-5. 🔧 Materials & Stock | "The direct costs of what you sell or make."
-6. 👔 Clothing | "Specialist clothing needed for your job."
-7. 📋 Professional Services | "Fees you pay to other professionals for your business. Accountant fees are also deductible."
-8. 🛡️ Insurance | "Policies that protect your business."
-9. 📚 Training | "Courses that help you do your current job better."
-10. 👥 Staff (if you have any) | "Costs related to hiring people."
-11. 🎫 Subscriptions | "Membership fees for professional organisations."
-
-The text after | is the "description" field to include in your JSON output verbatim.
-For any extra categories you add, write a similarly concise one-line description.
+1. 🏠 Working from home
+2. 📱 Office & Phone
+3. 💻 Tech & Equipment
+4. 🚗 Travel
+5. 🔧 Materials & Stock
+6. 👔 Clothing
+7. 📋 Professional Services
+8. 🛡️ Insurance
+9. 📚 Training
+10. 👥 Staff (if you have any)
+11. 🎫 Subscriptions
 
 PROFILE-BASED CATEGORIES — add these only if the user profile flag is YES:
-- Married → add: { "emoji": "💍", "name": "Marriage Allowance", "description": "Transfer unused Personal Allowance to your spouse and cut your combined tax bill.", "deductions": [{ "description": "Transfer £1,260 Personal Allowance to higher-earning spouse", "estimatedAmount": 252 }, { "description": "Backdate claim up to 4 tax years", "estimatedAmount": 1008 }] }
-- Has dependants → add: { "emoji": "👶", "name": "Child Benefits & Tax-Free Childcare", "description": "Government schemes that top up your childcare costs and reduce your tax bill.", "deductions": [{ "description": "Tax-Free Childcare government top-up (20% on up to £8k/yr per child)", "estimatedAmount": 2000 }, { "description": "Check High Income Child Benefit Charge threshold (£60k)", "estimatedAmount": 0 }] }
-- Has student loan → add: { "emoji": "🎓", "name": "Student Loan Planning", "description": "Understanding your repayment plan can prevent unnecessary overpayments.", "deductions": [{ "description": "Review Plan 1/2/4 repayment threshold vs your income", "estimatedAmount": 0 }, { "description": "Voluntary overpayments only if income is stable and interest rate justifies it", "estimatedAmount": 0 }] }
+- Married → add: { "emoji": "💍", "name": "Marriage Allowance", "description": "Transfer unused Personal Allowance to your spouse and cut your combined tax bill.", "adviceText": "If your spouse earns under £12,570 this year, claim now — and backdate up to 4 tax years for up to £1,260 extra.", "deductions": [{ "description": "Transfer £1,260 Personal Allowance to higher-earning spouse", "estimatedAmount": 252 }, { "description": "Backdate claim up to 4 tax years", "estimatedAmount": 1008 }] }
+- Has dependants → add: { "emoji": "👶", "name": "Child Benefits & Tax-Free Childcare", "description": "Government schemes that top up your childcare costs and reduce your tax bill.", "adviceText": "Earn over £60k? Check if the High Income Child Benefit Charge applies — and consider Tax-Free Childcare for up to £2,000/yr per child.", "deductions": [{ "description": "Tax-Free Childcare government top-up (20% on up to £8k/yr per child)", "estimatedAmount": 2000 }, { "description": "Check High Income Child Benefit Charge threshold (£60k)", "estimatedAmount": 0 }] }
+- Has student loan → add: { "emoji": "🎓", "name": "Student Loan Planning", "description": "Understanding your repayment plan can prevent unnecessary overpayments.", "adviceText": "Check your Plan type — overpaying voluntarily only makes sense if your interest rate is higher than savings rates.", "deductions": [{ "description": "Review Plan 1/2/4 repayment threshold vs your income", "estimatedAmount": 0 }, { "description": "Voluntary overpayments only if income is stable and interest rate justifies it", "estimatedAmount": 0 }] }
 
 WORKING FROM HOME — tailor the deductions based on housing status:
 - Homeowner (owns property = YES): deductions MUST be ["Proportion of mortgage interest (home-office rooms ÷ total rooms)", "Council tax proportion (business rooms ÷ total rooms)", "Heating & electricity proportion", "Broadband — business-use share"]
@@ -107,6 +104,8 @@ WORKING FROM HOME — tailor the deductions based on housing status:
 
 RULES:
 - For each selected category generate 2-4 deduction line items SPECIFIC to this person's profession — name real tools, platforms, registration bodies, courses, and services they would actually use.
+- For each category write a "description": one sentence explaining what this category covers FOR THIS SPECIFIC PROFESSION (not a generic definition). Max 100 chars.
+- For each category write an "adviceText": one actionable tip to maximise this deduction for this specific person. Max 120 chars.
 - Do NOT use generic labels like "software subscriptions" or "professional fees" — be specific (e.g. "Adobe Creative Cloud (£600/yr)", "Gas Safe Register annual fee", "GMC annual retention fee (£446)").
 - Do NOT include any category the person is already claiming.
 - Do NOT include "Materials & Stock" for knowledge workers (developers, designers, writers, consultants, therapists, accountants, etc.).
@@ -127,7 +126,8 @@ Return ONLY valid JSON, no markdown, no code fences:
     {
       "emoji": "💻",
       "name": "Tech & Equipment",
-      "description": "Bigger items you need to do your work.",
+      "description": "Hardware and software licences essential for building and testing iOS apps.",
+      "adviceText": "Buy equipment outright in one tax year to claim the full cost via Annual Investment Allowance.",
       "deductions": [
         { "description": "Apple Developer Program (£79/yr)", "estimatedAmount": 79 },
         { "description": "External monitor and peripherals", "estimatedAmount": 350 }

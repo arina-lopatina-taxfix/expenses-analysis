@@ -107,7 +107,8 @@ RULES:
 - For each category write a "description": one sentence explaining what this category covers FOR THIS SPECIFIC PROFESSION (not a generic definition). Max 100 chars.
 - For each category write an "adviceText": one actionable tip to maximise this deduction for this specific person. Max 120 chars.
 - Do NOT use generic labels like "software subscriptions" or "professional fees" — be specific (e.g. "Adobe Creative Cloud (£600/yr)", "Gas Safe Register annual fee", "GMC annual retention fee (£446)").
-- Do NOT include any category the person is already claiming.
+- The "already claimed expenses" list uses HMRC box names (e.g. "Office supplies", "Rent, rates, power") — these are NOT the same as the standard categories above. A person claiming "Office supplies (SA103F Box 23)" has NOT necessarily claimed "📱 Office & Phone" or "💻 Tech & Equipment". Only skip a category if the person is already claiming an expense that is IDENTICAL to what that category would add.
+- IMPORTANT: Always return at least 4 canImprove categories. Never return an empty list — if in doubt, include the category with relevant deductions the person might have missed.
 - Do NOT include "Materials & Stock" for knowledge workers (developers, designers, writers, consultants, therapists, accountants, etc.).
 - Do NOT include "Staff" if there is no indication the person employs others.
 
@@ -353,7 +354,10 @@ Generate specific missed deduction categories for this person. Apply all relevan
     const step2 = JSON.parse(raw2) as { canImprove: ExpenseCategory[] };
     console.log("Call 2 done. canImprove categories:", step2.canImprove?.length);
 
-    const canImprove = fixCanImprove(step2.canImprove || []);
+    const rawCanImprove = step2.canImprove && step2.canImprove.length > 0
+      ? step2.canImprove
+      : getMockData(profile).canImprove;
+    const canImprove = fixCanImprove(rawCanImprove);
 
     const analysis: TaxAnalysis = {
       taxYear: step1.taxYear,

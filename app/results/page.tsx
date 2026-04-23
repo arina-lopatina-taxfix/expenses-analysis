@@ -16,8 +16,7 @@ const MOCK_DATA: TaxAnalysis = {
       emoji: "🚗",
       name: "Vehicle expenses",
       claimedAmount: 1240,
-      claimedDescription:
-        "You've claimed mileage for business trips at the HMRC approved rate of 45p per mile.",
+      claimedDescription: "Business mileage at the HMRC approved rate of 45p per mile.",
       adviceText:
         "Consider switching to actual cost method if your vehicle is used predominantly for business — it may yield a higher deduction.",
     },
@@ -25,8 +24,7 @@ const MOCK_DATA: TaxAnalysis = {
       emoji: "📱",
       name: "Phone & internet",
       claimedAmount: 420,
-      claimedDescription:
-        "Business proportion of your mobile phone and broadband has been deducted.",
+      claimedDescription: "Business proportion of mobile phone and broadband deducted.",
       adviceText:
         "Ensure you're using the correct business-use percentage. If your usage has increased, recalculate.",
     },
@@ -34,16 +32,15 @@ const MOCK_DATA: TaxAnalysis = {
       emoji: "🏠",
       name: "Use of home",
       claimedAmount: 312,
-      claimedDescription:
-        "You've applied the flat rate allowance for working from home.",
+      claimedDescription: "HMRC flat rate of £6/week applied for working from home.",
       adviceText:
-        "If your home office is your primary place of business, calculating actual costs (heating, electricity, council tax proportion) often gives a larger deduction.",
+        "Calculating actual costs (heating, electricity, council tax proportion) often gives a larger deduction.",
     },
   ],
   canImprove: [
     {
       emoji: "💻",
-      name: "Equipment & technology",
+      name: "Tech & Equipment",
       deductions: [
         { description: "Laptop / computer replacement", estimatedAmount: 1200 },
         { description: "Monitor & peripherals", estimatedAmount: 350 },
@@ -52,15 +49,15 @@ const MOCK_DATA: TaxAnalysis = {
     },
     {
       emoji: "📚",
-      name: "Training & development",
+      name: "Training",
       deductions: [
         { description: "Online courses & certifications", estimatedAmount: 800 },
         { description: "Professional books & subscriptions", estimatedAmount: 150 },
       ],
     },
     {
-      emoji: "🤝",
-      name: "Professional services",
+      emoji: "📋",
+      name: "Professional Services",
       deductions: [
         { description: "Accountant fees", estimatedAmount: 600 },
         { description: "Legal advice", estimatedAmount: 300 },
@@ -82,9 +79,20 @@ function fmt(n: number) {
   return `£${n.toLocaleString("en-GB")}`;
 }
 
+function AmountChip({ text, bg = "#f4f1f1" }: { text: string; bg?: string }) {
+  return (
+    <span
+      className="flex items-center h-[32px] px-[8px] rounded-[8px] text-[14px] whitespace-nowrap ml-3 shrink-0"
+      style={{ background: bg, color: "rgba(12,11,10,0.8)", fontWeight: 400 }}
+    >
+      {text}
+    </span>
+  );
+}
+
 function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
   return (
-    <div className="flex flex-col gap-[16px] items-start justify-center p-[16px] relative w-[497px]">
+    <div className="flex flex-col gap-[16px] items-start justify-center p-[16px] relative w-full">
       <div
         className="absolute bg-white inset-0 rounded-[16px]"
         style={{ border: "1px solid rgba(12,11,10,0.08)" }}
@@ -105,22 +113,17 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
           )}
         </div>
         {category.claimedAmount !== undefined && (
-          <span
-            className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap ml-3 shrink-0"
-            style={{ background: "#f4f1f1", color: "rgba(12,11,10,0.8)" }}
-          >
-            {fmt(category.claimedAmount)}
-          </span>
+          <AmountChip text={fmt(category.claimedAmount)} />
         )}
       </div>
       {/* Advice box */}
       {category.adviceText && (
         <div
-          className="bg-[#f9f7f5] flex flex-col p-[14px] rounded-[12px] w-full"
+          className="bg-[#f9f7f5] flex flex-col p-[14px] rounded-[12px] w-full relative"
           style={{ gap: 2 }}
         >
           <div className="flex gap-[6px] items-start">
-            <span className="text-[20px] leading-[20px] shrink-0">⚡</span>
+            <span className="text-[16px] leading-[20px] shrink-0">⚡</span>
             <p
               className="text-[14px] text-[#0c0b0a] leading-[20px]"
               style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
@@ -139,34 +142,43 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
 
 function CanImproveCard({ category }: { category: ExpenseCategory }) {
   return (
-    <div className="flex flex-col gap-[16px] items-start p-[16px] relative w-[497px]">
+    <div className="flex flex-col gap-[12px] items-start justify-center p-[16px] relative w-full">
       <div
         className="absolute bg-white inset-0 rounded-[16px]"
         style={{ border: "1px solid rgba(12,11,10,0.08)" }}
       />
-      {/* Header */}
+      {/* Header — name only, no chip */}
       <p
         className="overflow-hidden text-ellipsis text-[16px] text-[#0c0b0a] leading-[20px] relative w-full"
-        style={{ fontWeight: 700 }}
+        style={{ fontWeight: 500 }}
       >
         {category.emoji} {category.name}
       </p>
-      {/* Deductions — plain rows, no wrapper box */}
+      {/* Orange deductions box */}
       {category.deductions && category.deductions.length > 0 && (
-        <div className="flex flex-col w-full relative" style={{ gap: 12 }}>
-          {category.deductions.map((d, i) => (
-            <div key={i} className="flex items-center justify-between w-full">
-              <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
-                {d.description}
-              </span>
-              <span
-                className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap ml-3 shrink-0"
-                style={{ background: "#f4f1f1", color: "rgba(12,11,10,0.8)" }}
-              >
-                ~{fmt(d.estimatedAmount)}
-              </span>
-            </div>
-          ))}
+        <div
+          className="bg-[#ffefd3] flex flex-col p-[14px] rounded-[12px] w-full relative"
+          style={{ gap: 8 }}
+        >
+          <div className="flex gap-[6px] items-start">
+            <span className="text-[16px] leading-[20px] shrink-0">❓</span>
+            <p
+              className="text-[14px] text-[#0c0b0a] leading-[20px]"
+              style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
+            >
+              What you can deduct?
+            </p>
+          </div>
+          <div className="flex flex-col" style={{ gap: 8 }}>
+            {category.deductions.map((d, i) => (
+              <div key={i} className="flex items-center justify-between w-full">
+                <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
+                  {d.description}
+                </span>
+                <AmountChip text={`~${fmt(d.estimatedAmount)}`} bg="white" />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -182,7 +194,6 @@ export default function ResultsPage() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        // Merge with MOCK_DATA if Gemini returned a partial error stub
         if (!parsed.alreadyClaiming || !parsed.canImprove) {
           setAnalysis({ ...MOCK_DATA, ...parsed });
         } else {
@@ -223,7 +234,9 @@ export default function ResultsPage() {
           <p className="text-amber-800 text-[13px]">
             ⚠️ Showing example data — your PDF was not analysed.
             {analysis.errorDetail && (
-              <span className="block text-amber-700 text-[11px] mt-0.5 opacity-80">{analysis.errorDetail}</span>
+              <span className="block text-amber-700 text-[11px] mt-0.5 opacity-80">
+                {analysis.errorDetail}
+              </span>
             )}
           </p>
         </div>
@@ -231,35 +244,41 @@ export default function ResultsPage() {
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
-        {/* White header section */}
+        {/* White header section — matches Figma top-[120px] from page top (75px appbar + 45px gap) */}
         <div
           className="flex flex-col items-center text-center px-6"
-          style={{ paddingTop: 32, paddingBottom: 32, gap: 6 }}
+          style={{ paddingTop: 45, paddingBottom: 36, gap: 6 }}
         >
-          <p className="text-[12px] text-[#36893b] text-center" style={{ fontWeight: 400 }}>
+          <p
+            className="text-[12px] text-[#36893b] text-center w-full"
+            style={{ fontWeight: 400, lineHeight: 1.3 }}
+          >
             YOUR TAX RETURN {analysis.taxYear}
           </p>
-          <h1 className="text-[30px] text-black" style={{ fontWeight: 700, lineHeight: 1.2 }}>
+          <h1 className="text-[30px] text-black whitespace-nowrap" style={{ fontWeight: 700, lineHeight: 1.2 }}>
             You could have claimed{" "}
             <span style={{ color: "#36893b" }}>{fmt(analysis.totalMissedDeductions)}</span>
             {" "}more
           </h1>
-          {analysis.businessType && (
-            <p className="text-[14px] text-[rgba(12,11,10,0.6)] leading-[1.3] text-center">
-              {analysis.incomeType} · {analysis.businessType}
-            </p>
-          )}
+          <p
+            className="text-[14px] text-[rgba(12,11,10,0.6)] leading-[1.3] text-center"
+            style={{ maxWidth: 600 }}
+          >
+            {analysis.businessType
+              ? `We compared your SA103 return against ${analysis.businessType} with similar turnover. Here's what's on your return — and what you missed.`
+              : "Here's what's on your return — and what you missed."}
+          </p>
         </div>
 
-        {/* Beige content section */}
+        {/* Beige content section — matches Figma top-[256px], content at top-[307px] → paddingTop 51px */}
         <div
           className="px-4 xl:px-16"
           style={{
             background: "#f9f7f5",
             borderTopLeftRadius: 30,
             borderTopRightRadius: 30,
-            paddingTop: 32,
-            paddingBottom: 32,
+            paddingTop: 51,
+            paddingBottom: 48,
           }}
         >
           <div
@@ -267,7 +286,7 @@ export default function ResultsPage() {
             style={{ gap: 53, maxWidth: 1051 }}
           >
             {/* LEFT — Already expensing */}
-            <div className="flex flex-col flex-1" style={{ gap: 16 }}>
+            <div className="flex flex-col w-full xl:w-[499px] shrink-0" style={{ gap: 16 }}>
               <div className="flex items-center justify-between">
                 <h2
                   className="text-[20px] text-black whitespace-nowrap"
@@ -276,7 +295,7 @@ export default function ResultsPage() {
                   What you are already expensing
                 </h2>
                 <span
-                  className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white ml-3 shrink-0"
+                  className="flex items-center h-[32px] px-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white ml-3 shrink-0"
                   style={{ color: "rgba(12,11,10,0.8)" }}
                 >
                   {analysis.alreadyClaiming.length} categories
@@ -290,7 +309,7 @@ export default function ResultsPage() {
             </div>
 
             {/* RIGHT — Can improve */}
-            <div className="flex flex-col flex-1" style={{ gap: 16 }}>
+            <div className="flex flex-col w-full xl:w-[499px] shrink-0" style={{ gap: 16 }}>
               <div className="flex items-center justify-between">
                 <h2
                   className="text-[20px] text-black whitespace-nowrap"
@@ -299,7 +318,7 @@ export default function ResultsPage() {
                   What can be improved
                 </h2>
                 <span
-                  className="flex items-center h-[32px] pl-[4px] pr-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white ml-3 shrink-0"
+                  className="flex items-center h-[32px] px-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white ml-3 shrink-0"
                   style={{ color: "rgba(12,11,10,0.8)" }}
                 >
                   {analysis.canImprove.length} categories
@@ -322,17 +341,17 @@ export default function ResultsPage() {
       >
         <button
           onClick={() => router.push("/upload")}
-          className="absolute flex gap-[8px] items-center left-[39px] top-[30px] text-[#154618] text-[16px] hover:opacity-70 transition-opacity"
+          className="absolute flex gap-[8px] items-center left-[39px] top-1/2 -translate-y-1/2 text-[#154618] text-[16px] hover:opacity-70 transition-opacity"
           style={{ fontWeight: 500 }}
         >
           <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
-            <path d="M13 16l-6-6 6-6" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M13 16l-6-6 6-6" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           Back
         </button>
         <button
           onClick={() => window.print()}
-          className="absolute bg-[#a0d766] h-[48px] right-[20px] top-[16px] rounded-[10px] w-[177px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
+          className="absolute bg-[#a0d766] h-[48px] right-[20px] top-1/2 -translate-y-1/2 rounded-[10px] w-[177px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
           style={{ fontWeight: 600 }}
         >
           Continue

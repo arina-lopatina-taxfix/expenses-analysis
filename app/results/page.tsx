@@ -151,7 +151,7 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
           style={{ gap: 2 }}
         >
           <div className="flex gap-[6px] items-start">
-            <FaIcon glyph={''} />
+            <FaIcon glyph={''} />
             <p
               className="text-[14px] text-[#0c0b0a] leading-[20px]"
               style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
@@ -196,7 +196,7 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
             style={{ gap: 2 }}
           >
             <div className="flex gap-[6px] items-start">
-              <FaIcon glyph={''} />
+              <FaIcon glyph={''} />
               <p
                 className="text-[14px] text-[#0c0b0a] leading-[20px]"
                 style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
@@ -402,7 +402,9 @@ export default function ResultsPage() {
           className="absolute flex gap-[8px] items-center left-[39px] top-1/2 -translate-y-1/2 text-[#154618] text-[16px] hover:opacity-70 transition-opacity"
           style={{ fontWeight: 500 }}
         >
-          <FaIcon glyph={''} className="shrink-0 text-[16px] leading-[20px] w-[20px] text-center inline-block text-[#154618]" />
+          <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+            <path d="M13 16l-6-6 6-6" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
           Back
         </button>
         <button

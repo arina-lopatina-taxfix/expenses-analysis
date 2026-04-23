@@ -78,7 +78,7 @@ const PROMPT_2 = `You are a UK tax expert specialising in HMRC expense optimisat
 
 ${HMRC_RATES}
 
-FIXED CATEGORY LIST — use ONLY these categories (with exact emoji and name) for self-employed people. Select the ones relevant to this profession and skip any that clearly don't apply.
+CATEGORY LIST — start with these standard categories (use exact emoji and name). Select the ones relevant to this profession and skip any that clearly don't apply. You MAY also add extra profession-specific categories beyond this list if there are significant deductions not covered — but do NOT duplicate or rename anything already in the list or already claimed.
 
 1. 🏠 Working from home — proportion of heating, electricity, broadband, council tax (or flat £6/wk)
 2. 📱 Office & Phone — stationery, postage, phone bills, broadband, admin software

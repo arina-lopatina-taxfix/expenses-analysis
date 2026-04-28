@@ -12,12 +12,12 @@ const LOGO = "https://www.figma.com/api/mcp/asset/0f54586b-884a-43e7-ba5a-46cee4
 const BREVO_FORM_HTML = `
 <div id="sib-container" class="sib-container--large sib-container--vertical" style="text-align:center; background-color:rgba(255,255,255,1); max-width:540px; border-radius:11px; border-width:0px; border-color:#C0CCD9; border-style:solid;">
   <form id="sib-form" method="POST" action="https://f261eed8.sibforms.com/serve/MUIFAOemvK9thqVxmi_0nOw0h_5iqdlmUB9nsoUk4fCMy5D3pfi-E21RovraavOT_XasAksNSWXqJjgiol5S2aC2Y2tx95jd2ZcWY1nYu7RaVQ9G67bjkJNwtbXkIoLbWLpLba-xwY4FYSWQfGwFqrh9oevNdBU1Fpmxodgb_15a3MeJWxAbEXKXsHamwo8FOboEoR2ebjI_o3b7">
-    <div style="padding: 8px 0;">
+    <div style="padding: 8px 0 0;">
       <div class="sib-form-block" style="font-size:27px; text-align:center; font-weight:700; font-family:Helvetica, sans-serif; color:#000000; background-color:transparent;">
         <p>Your tax summary is almost ready</p>
       </div>
     </div>
-    <div style="padding: 8px 0 20px;">
+    <div style="padding: 4px 0 20px;">
       <div class="sib-form-block" style="font-size:16px; text-align:center; font-family:Helvetica, sans-serif; color:#7b8289; background-color:transparent;">
         <div class="sib-text-form-block">
           <p>Enter your details to see where you could claim back expenses and avoid leaving money on the table</p>

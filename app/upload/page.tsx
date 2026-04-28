@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-const LOGO = "https://www.figma.com/api/mcp/asset/64cdc44d-ec4a-496b-a76c-a9b353da8e57";
+const LOGO = "/logo.png";
 const DOC_SHADOW = "https://www.figma.com/api/mcp/asset/241ae416-cf71-4622-9cce-d9df9d3ae161";
 const DOC_ILLUSTRATION = "https://www.figma.com/api/mcp/asset/c139c461-5ba5-47a3-8412-fc94ab09a652";
 

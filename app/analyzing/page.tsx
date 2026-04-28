@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-const LOGO = "https://www.figma.com/api/mcp/asset/1e759fff-4944-494b-9206-4f0aa2188ccc";
+const LOGO = "/logo.png";
 const ILLUSTRATION = "https://www.figma.com/api/mcp/asset/9e612669-f595-4428-ad88-9ceacf67ca90";
 
 const STAGES = [

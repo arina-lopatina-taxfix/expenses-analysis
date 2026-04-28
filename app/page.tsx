@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { UserProfile } from "@/lib/types";
 
-const LOGO = "https://www.figma.com/api/mcp/asset/521ae05a-d3bf-40b4-a954-2d7a85f26467";
+const LOGO = "/logo.png";
 const DECORATIVE = "https://www.figma.com/api/mcp/asset/faafab47-24cc-425c-9c92-6f3839e34bc7";
 
 const OPTIONS: { key: keyof UserProfile; label: string }[] = [

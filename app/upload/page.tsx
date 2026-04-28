@@ -55,7 +55,7 @@ export default function UploadPage() {
     <main className="bg-white relative min-h-screen">
       {/* Logo */}
       <div className="-translate-x-1/2 absolute h-[27px] left-1/2 top-[32px] w-[96px]">
-        <img alt="Taxfix" className="h-[27px] w-[96px] object-contain" src={LOGO} />
+        <img alt="Taxfix" className="h-[23px] w-[96px] object-contain" src={LOGO} />
       </div>
 
       {/* Content */}

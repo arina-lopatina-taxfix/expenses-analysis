@@ -308,12 +308,12 @@ export default function ResultsPage() {
           style={{ paddingTop: 45, paddingBottom: 36, gap: 6 }}
         >
           <p
-            className="text-[12px] text-[#36893b] text-center w-full"
-            style={{ fontWeight: 400, lineHeight: 1.3 }}
+            className="text-[12px] text-center w-full"
+            style={{ fontWeight: 400, lineHeight: 1.3, color: "rgba(0,0,0,0.5)" }}
           >
             YOUR TAX RETURN {analysis.taxYear}
           </p>
-          <h1 className="text-[30px] text-black whitespace-nowrap" style={{ fontWeight: 700, lineHeight: 1.2 }}>
+          <h1 className="text-[32px] text-black whitespace-nowrap" style={{ fontWeight: 700, lineHeight: 1.2 }}>
             You could have claimed{" "}
             <span style={{ color: "#36893b" }}>{fmt(analysis.totalMissedDeductions)}</span>
             {" "}more

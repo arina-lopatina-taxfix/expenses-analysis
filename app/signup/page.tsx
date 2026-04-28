@@ -17,7 +17,7 @@ const BREVO_FORM_HTML = `
         <p>Your tax summary is almost ready</p>
       </div>
     </div>
-    <div style="padding: 8px 0;">
+    <div style="padding: 8px 0 20px;">
       <div class="sib-form-block" style="font-size:16px; text-align:center; font-family:Helvetica, sans-serif; color:#7b8289; background-color:transparent;">
         <div class="sib-text-form-block">
           <p>Enter your details to see where you could claim back expenses and avoid leaving money on the table</p>

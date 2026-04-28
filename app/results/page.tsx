@@ -230,8 +230,8 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
           </div>
           <div className="flex flex-col" style={{ gap: 8 }}>
             {category.deductions.map((d, i) => (
-              <div key={i} className="flex items-center justify-between w-full">
-                <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
+              <div key={i} className="flex items-center gap-[12px] w-full">
+                <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5] flex-1">
                   {d.description}
                 </span>
                 <AmountChip text={`~${fmt(d.estimatedAmount)}`} />

@@ -114,6 +114,11 @@ export default function SignUpPage() {
         #sib-container .input {
           border: 1px solid #96928E !important;
           border-radius: 6px !important;
+          height: 50px !important;
+        }
+        #sib-container .sib-form-block__button {
+          width: 100% !important;
+          height: 50px !important;
         }
       `}</style>
       {/* App bar */}

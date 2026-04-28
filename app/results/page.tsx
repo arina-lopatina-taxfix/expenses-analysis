@@ -322,9 +322,7 @@ export default function ResultsPage() {
             className="text-[14px] text-[rgba(12,11,10,0.6)] leading-[1.3] text-center"
             style={{ maxWidth: 600 }}
           >
-            {analysis.businessType
-              ? `We compared your SA103 return against ${analysis.businessType} with similar turnover. Here's what's on your return — and what you missed.`
-              : "Here's what's on your return — and what you missed."}
+            {`We compared your SA103 return with others from people in a similar income bracket and the same type of income. Here's what's on your return — and what you might be missing. All numbers shown are illustrative only.`}
           </p>
         </div>
 

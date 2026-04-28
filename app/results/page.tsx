@@ -407,10 +407,14 @@ export default function ResultsPage() {
         </button>
         <button
           onClick={() => window.print()}
-          className="absolute bg-[#a0d766] h-[48px] right-[20px] top-1/2 -translate-y-1/2 rounded-[10px] w-[177px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
+          className="absolute bg-[#a0d766] h-[48px] right-[20px] top-1/2 -translate-y-1/2 rounded-[10px] px-[20px] flex items-center gap-[8px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
           style={{ fontWeight: 600 }}
         >
-          Continue
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1v9M4.5 6.5 8 10l3.5-3.5" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M2 12h12" stroke="#154618" strokeWidth="1.75" strokeLinecap="round"/>
+          </svg>
+          Download summary
         </button>
       </div>
     </div>

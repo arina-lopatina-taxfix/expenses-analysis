@@ -194,7 +194,6 @@ export default function SignUpPage() {
                 onChange={setEmail}
                 required
               />
-              <IncomeToggle value={incomeType} onChange={setIncomeType} />
               <button
                 type="submit"
                 disabled={submitting}

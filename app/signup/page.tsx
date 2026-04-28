@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 const LOGO = "https://www.figma.com/api/mcp/asset/0f54586b-884a-43e7-ba5a-46cee4829c8b";
 
@@ -10,7 +13,7 @@ const BREVO_FORM_HTML = `
 <div id="sib-container" class="sib-container--large sib-container--vertical" style="text-align:center; background-color:rgba(255,255,255,1); max-width:540px; border-radius:11px; border-width:0px; border-color:#C0CCD9; border-style:solid;">
   <form id="sib-form" method="POST" action="https://f261eed8.sibforms.com/serve/MUIFAOemvK9thqVxmi_0nOw0h_5iqdlmUB9nsoUk4fCMy5D3pfi-E21RovraavOT_XasAksNSWXqJjgiol5S2aC2Y2tx95jd2ZcWY1nYu7RaVQ9G67bjkJNwtbXkIoLbWLpLba-xwY4FYSWQfGwFqrh9oevNdBU1Fpmxodgb_15a3MeJWxAbEXKXsHamwo8FOboEoR2ebjI_o3b7">
     <div style="padding: 8px 0;">
-      <div class="sib-form-block" style="font-size:27px; text-align:center; font-weight:700; font-family:Helvetica, sans-serif; color:#3C4858; background-color:transparent;">
+      <div class="sib-form-block" style="font-size:27px; text-align:center; font-weight:700; font-family:Helvetica, sans-serif; color:#000000; background-color:transparent;">
         <p>Your tax summary is almost ready</p>
       </div>
     </div>
@@ -105,7 +108,14 @@ export default function SignUpPage() {
   }, [router]);
 
   return (
-    <main className="min-h-screen flex flex-col" style={{ background: "#f9f7f5" }}>
+    <main className={`min-h-screen flex flex-col ${inter.className}`} style={{ background: "#f9f7f5" }}>
+      <style>{`
+        #sib-container * { font-family: 'Inter', sans-serif !important; }
+        #sib-container .input {
+          border: 1px solid #96928E !important;
+          border-radius: 6px !important;
+        }
+      `}</style>
       {/* App bar */}
       <header
         className="sticky top-0 z-20 bg-white flex items-center justify-center px-[64px]"

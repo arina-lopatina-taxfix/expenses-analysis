@@ -274,7 +274,88 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <>
+    {/* ── Print-only checklist ─────────────────────────────────────── */}
+    <div className="print-only" style={{ fontFamily: "'ABC ROM', sans-serif", color: "#0c0b0a" }}>
+      {/* Header */}
+      <div style={{ marginBottom: 20 }}>
+        <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.2, marginBottom: 6 }}>
+          Here's your expenses checklist
+        </p>
+        <p style={{ fontSize: 10, color: "rgba(12,11,10,0.6)", lineHeight: 1.3, maxWidth: 515 }}>
+          We've reviewed your Self Assessment tax return and identified expense categories that may apply to you. Use this checklist to see which expenses you've paid for and may be able to claim.
+        </p>
+      </div>
+
+      {/* Category cards */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 515 }}>
+        {analysis.canImprove.map((cat, i) => (
+          <div
+            key={i}
+            style={{
+              border: "0.5px solid rgba(12,11,10,0.1)",
+              borderRadius: 4,
+              padding: 11,
+              display: "flex",
+              flexDirection: "column",
+              gap: 11,
+            }}
+          >
+            {/* Category header row */}
+            <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+              <div style={{
+                width: 14, height: 14, border: "1.5px solid #96928e",
+                borderRadius: 4, flexShrink: 0, marginTop: 1,
+              }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
+                <p style={{ fontSize: 11, fontWeight: 500, lineHeight: 1, margin: 0 }}>
+                  {cat.emoji} {cat.name}
+                </p>
+                {cat.description && (
+                  <p style={{ fontSize: 10, color: "rgba(12,11,10,0.6)", lineHeight: 1.3, margin: 0 }}>
+                    {cat.description}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div style={{ height: 1, background: "rgba(12,11,10,0.1)" }} />
+
+            {/* Deduction rows */}
+            {(cat.deductions ?? []).map((d, j) => (
+              <div key={j} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{
+                  width: 14, height: 14, border: "1.5px solid #96928e",
+                  borderRadius: 4, flexShrink: 0,
+                }} />
+                <p style={{ fontSize: 10, color: "rgba(12,11,10,0.6)", lineHeight: 1.3, margin: 0 }}>
+                  {d.description}
+                </p>
+              </div>
+            ))}
+
+            {/* Divider */}
+            {cat.adviceText && <div style={{ height: 1, background: "rgba(12,11,10,0.1)" }} />}
+
+            {/* Advice */}
+            {cat.adviceText && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <p style={{ fontSize: 11, fontWeight: 500, lineHeight: 1, margin: 0 }}>
+                  💡 Advice
+                </p>
+                <p style={{ fontSize: 10, color: "rgba(12,11,10,0.6)", lineHeight: 1.3, margin: 0 }}>
+                  {cat.adviceText}
+                </p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* ── Screen view ──────────────────────────────────────────────── */}
+    <div className="screen-only min-h-screen bg-white flex flex-col">
       {/* App bar */}
       <header
         className="sticky top-0 z-20 bg-white flex items-center justify-center px-[64px]"
@@ -418,5 +499,6 @@ export default function ResultsPage() {
         </button>
       </div>
     </div>
+    </>
   );
 }

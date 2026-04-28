@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+@media print {
+  @page {
+    size: A4;
+    margin: 40px;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+}
+
+.print-only {
+  display: none;
+}
+
 @font-face {
   font-family: 'Font Awesome 7 Free';
   src: url('/fonts/Font Awesome 7 Free-Regular-400.otf') format('opentype');

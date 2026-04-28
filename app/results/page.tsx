@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { track } from "@vercel/analytics";
 import type { TaxAnalysis, ExpenseCategory } from "@/lib/types";
 
 const LOGO = "/logo.png";
@@ -247,6 +248,8 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
 export default function ResultsPage() {
   const router = useRouter();
   const [analysis, setAnalysis] = useState<TaxAnalysis | null>(null);
+
+  useEffect(() => { track("page_viewed", { page: "results" }); }, []);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("taxAnalysis");

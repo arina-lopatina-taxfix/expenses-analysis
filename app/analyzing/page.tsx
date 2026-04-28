@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { track } from "@vercel/analytics";
 
 const LOGO = "/logo.png";
 const ILLUSTRATION = "https://www.figma.com/api/mcp/asset/9e612669-f595-4428-ad88-9ceacf67ca90";
@@ -16,6 +17,8 @@ export default function AnalyzingPage() {
   const router = useRouter();
   const [activeStage, setActiveStage] = useState(0);
   const hasFetched = useRef(false);
+
+  useEffect(() => { track("page_viewed", { page: "analyzing" }); }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {

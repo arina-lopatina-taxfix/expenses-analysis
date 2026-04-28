@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
+import { track } from "@vercel/analytics";
 
 const LOGO = "/logo.png";
 
@@ -66,6 +67,8 @@ const BREVO_FORM_HTML = `
 
 export default function SignUpPage() {
   const router = useRouter();
+
+  useEffect(() => { track("page_viewed", { page: "signup" }); }, []);
 
   useEffect(() => {
     // Load Brevo stylesheet

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { track } from "@vercel/analytics";
 
 const LOGO = "/logo.png";
 const DOC_SHADOW = "https://www.figma.com/api/mcp/asset/241ae416-cf71-4622-9cce-d9df9d3ae161";
@@ -9,6 +10,9 @@ const DOC_ILLUSTRATION = "https://www.figma.com/api/mcp/asset/c139c461-5ba5-47a3
 
 export default function UploadPage() {
   const router = useRouter();
+
+  useEffect(() => { track("page_viewed", { page: "upload" }); }, []);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);

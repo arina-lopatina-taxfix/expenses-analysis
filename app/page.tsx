@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { track } from "@vercel/analytics";
 import type { UserProfile } from "@/lib/types";
 
 const LOGO = "/logo.png";
@@ -17,6 +18,9 @@ const OPTIONS: { key: keyof UserProfile; label: string }[] = [
 
 export default function ProfilePage() {
   const router = useRouter();
+
+  useEffect(() => { track("page_viewed", { page: "profile" }); }, []);
+
   const [profile, setProfile] = useState<UserProfile>({
     married: false,
     dependants: false,

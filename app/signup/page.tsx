@@ -121,6 +121,10 @@ export default function SignUpPage() {
           height: 50px !important;
           color: #154618 !important;
         }
+        #sib-container .sib-form-block__button .icon {
+          width: 20px !important;
+          height: 20px !important;
+        }
       `}</style>
       {/* App bar */}
       <header

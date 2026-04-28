@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { TaxAnalysis, ExpenseCategory } from "@/lib/types";
 
-const LOGO = "https://www.figma.com/api/mcp/asset/0f54586b-884a-43e7-ba5a-46cee4829c8b";
+const LOGO = "/logo.png";
 
 const MOCK_DATA: TaxAnalysis = {
   taxYear: "2024/25",

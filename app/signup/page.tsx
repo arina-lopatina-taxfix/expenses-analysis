@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 
-const LOGO = "https://www.figma.com/api/mcp/asset/0f54586b-884a-43e7-ba5a-46cee4829c8b";
+const LOGO = "/logo.png";
 
 const BREVO_FORM_HTML = `
 <div id="sib-container" class="sib-container--large sib-container--vertical" style="text-align:center; background-color:rgba(255,255,255,1); max-width:540px; border-radius:11px; border-width:0px; border-color:#C0CCD9; border-style:solid;">

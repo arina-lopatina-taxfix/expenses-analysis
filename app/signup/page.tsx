@@ -3,9 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
 
 const LOGO = "https://www.figma.com/api/mcp/asset/0f54586b-884a-43e7-ba5a-46cee4829c8b";
 
@@ -18,7 +15,7 @@ const BREVO_FORM_HTML = `
       </div>
     </div>
     <div style="padding: 4px 0 20px;">
-      <div class="sib-form-block" style="font-size:16px; text-align:center; font-family:Helvetica, sans-serif; color:#7b8289; background-color:transparent;">
+      <div class="sib-form-block" style="font-size:16px; text-align:center; font-family:Helvetica, sans-serif; color:#6B6968; background-color:transparent;">
         <div class="sib-text-form-block">
           <p>Enter your details to see where you could claim back expenses and avoid leaving money on the table</p>
         </div>
@@ -108,9 +105,10 @@ export default function SignUpPage() {
   }, [router]);
 
   return (
-    <main className={`min-h-screen flex flex-col ${inter.className}`} style={{ background: "#f9f7f5" }}>
+    <main className="min-h-screen flex flex-col" style={{ background: "#f9f7f5" }}>
       <style>{`
-        #sib-container * { font-family: 'Inter', sans-serif !important; }
+        #sib-container * { font-family: 'ABC ROM', sans-serif !important; }
+        #sib-container .entry__label { color: #000000 !important; }
         #sib-container .input {
           border: 1px solid #96928E !important;
           border-radius: 15px !important;

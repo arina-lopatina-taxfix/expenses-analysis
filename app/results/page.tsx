@@ -495,7 +495,7 @@ export default function ResultsPage() {
             <path d="M8 1v9M4.5 6.5 8 10l3.5-3.5" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M2 12h12" stroke="#154618" strokeWidth="1.75" strokeLinecap="round"/>
           </svg>
-          Download summary
+          Download personal checklist
         </button>
       </div>
     </div>

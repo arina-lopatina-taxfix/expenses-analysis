@@ -1,143 +1,108 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 
 const LOGO = "https://www.figma.com/api/mcp/asset/0f54586b-884a-43e7-ba5a-46cee4829c8b";
 
-type IncomeType = "self-employed" | "landlord";
-
-function FloatingInput({
-  id,
-  label,
-  type = "text",
-  value,
-  onChange,
-  required,
-}: {
-  id: string;
-  label: string;
-  type?: string;
-  value: string;
-  onChange: (v: string) => void;
-  required?: boolean;
-}) {
-  const [focused, setFocused] = useState(false);
-  const lifted = focused || value.length > 0;
-
-  return (
-    <div className="relative w-full">
-      <input
-        id={id}
-        type={type}
-        value={value}
-        required={required}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        placeholder=""
-        className="w-full rounded-[8px] bg-white px-[14px] pt-[22px] pb-[8px] text-[16px] text-[#0c0b0a] outline-none transition-colors"
-        style={{
-          border: focused ? "2px solid #4C4991" : "1px solid rgba(12,11,10,0.2)",
-        }}
-      />
-      <label
-        htmlFor={id}
-        className="pointer-events-none absolute left-[14px] transition-all duration-150"
-        style={{
-          top: lifted ? 6 : 16,
-          fontSize: lifted ? 11 : 16,
-          color: lifted ? "#4C4991" : "rgba(12,11,10,0.45)",
-          fontWeight: 400,
-          lineHeight: 1.4,
-        }}
-      >
-        {label}{required && " *"}
-      </label>
-    </div>
-  );
-}
-
-function IncomeToggle({
-  value,
-  onChange,
-}: {
-  value: IncomeType;
-  onChange: (v: IncomeType) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-[8px] w-full">
-      <p className="text-[12px]" style={{ color: "rgba(12,11,10,0.45)", fontWeight: 400 }}>
-        I am *
-      </p>
-      <div
-        className="flex w-full rounded-[8px] p-[3px]"
-        style={{ background: "rgba(12,11,10,0.06)" }}
-      >
-        {(["self-employed", "landlord"] as IncomeType[]).map((opt) => {
-          const active = value === opt;
-          return (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => onChange(opt)}
-              className="flex-1 h-[36px] rounded-[6px] text-[14px] transition-all"
-              style={{
-                background: active ? "white" : "transparent",
-                color: active ? "#0c0b0a" : "rgba(12,11,10,0.5)",
-                fontWeight: active ? 600 : 400,
-                boxShadow: active ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-              }}
-            >
-              {opt === "self-employed" ? "Self-employed" : "Landlord"}
-            </button>
-          );
-        })}
+const BREVO_FORM_HTML = `
+<div id="sib-container" class="sib-container--large sib-container--vertical" style="text-align:center; background-color:rgba(255,255,255,1); max-width:540px; border-radius:11px; border-width:0px; border-color:#C0CCD9; border-style:solid;">
+  <form id="sib-form" method="POST" action="https://f261eed8.sibforms.com/serve/MUIFAOemvK9thqVxmi_0nOw0h_5iqdlmUB9nsoUk4fCMy5D3pfi-E21RovraavOT_XasAksNSWXqJjgiol5S2aC2Y2tx95jd2ZcWY1nYu7RaVQ9G67bjkJNwtbXkIoLbWLpLba-xwY4FYSWQfGwFqrh9oevNdBU1Fpmxodgb_15a3MeJWxAbEXKXsHamwo8FOboEoR2ebjI_o3b7">
+    <div style="padding: 8px 0;">
+      <div class="sib-form-block" style="font-size:27px; text-align:center; font-weight:700; font-family:Helvetica, sans-serif; color:#3C4858; background-color:transparent;">
+        <p>Your tax summary is almost ready</p>
       </div>
     </div>
-  );
-}
+    <div style="padding: 8px 0;">
+      <div class="sib-form-block" style="font-size:16px; text-align:center; font-family:Helvetica, sans-serif; color:#7b8289; background-color:transparent;">
+        <div class="sib-text-form-block">
+          <p>Enter your details to see where you could claim back expenses and avoid leaving money on the table</p>
+        </div>
+      </div>
+    </div>
+    <div style="padding: 8px 0;">
+      <div class="sib-input sib-form-block">
+        <div class="form__entry entry_block">
+          <div class="form__label-row">
+            <label class="entry__label" style="font-weight:700; text-align:left; font-size:16px; font-family:Helvetica, sans-serif; color:#3c4858;" for="FIRSTNAME" data-required="*">First name</label>
+            <div class="entry__field">
+              <input class="input" maxlength="200" type="text" id="FIRSTNAME" name="FIRSTNAME" autocomplete="off" data-required="true" required />
+            </div>
+          </div>
+          <label class="entry__error entry__error--primary" style="font-size:16px; text-align:left; font-family:Helvetica, sans-serif; color:#661d1d; background-color:#ffeded; border-radius:3px; border-color:#ff4949;"></label>
+        </div>
+      </div>
+    </div>
+    <div style="padding: 8px 0;">
+      <div class="sib-input sib-form-block">
+        <div class="form__entry entry_block">
+          <div class="form__label-row">
+            <label class="entry__label" style="font-weight:700; text-align:left; font-size:16px; font-family:Helvetica, sans-serif; color:#3c4858;" for="EMAIL" data-required="*">Email</label>
+            <div class="entry__field">
+              <input class="input" type="text" id="EMAIL" name="EMAIL" autocomplete="off" data-required="true" required />
+            </div>
+          </div>
+          <label class="entry__error entry__error--primary" style="font-size:16px; text-align:left; font-family:Helvetica, sans-serif; color:#661d1d; background-color:#ffeded; border-radius:3px; border-color:#ff4949;"></label>
+        </div>
+      </div>
+    </div>
+    <div style="padding: 8px 0;">
+      <div class="sib-form-block" style="text-align:center">
+        <button class="sib-form-block__button sib-form-block__button-with-loader" style="font-size:16px; text-align:center; font-weight:700; font-family:Helvetica, sans-serif; color:#FFFFFF; background-color:#a0d766; border-radius:15px; border-width:0px;" form="sib-form" type="submit">
+          <svg class="icon clickable__icon progress-indicator__icon sib-hide-loader-icon" viewBox="0 0 512 512">
+            <path d="M460.116 373.846l-20.823-12.022c-5.541-3.199-7.54-10.159-4.663-15.874 30.137-59.886 28.343-131.652-5.386-189.946-33.641-58.394-94.896-95.833-161.827-99.676C261.028 55.961 256 50.751 256 44.352V20.309c0-6.904 5.808-12.337 12.703-11.982 83.556 4.306 160.163 50.864 202.11 123.677 42.063 72.696 44.079 162.316 6.031 236.832-3.14 6.148-10.75 8.461-16.728 5.01z" />
+          </svg>
+          Get my tax summary
+        </button>
+      </div>
+    </div>
+    <input type="text" name="email_address_check" value="" class="input--hidden" />
+    <input type="hidden" name="locale" value="en" />
+    <input type="hidden" name="html_type" value="simple" />
+  </form>
+</div>
+`;
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [firstName, setFirstName] = useState("");
-  const [email, setEmail] = useState("");
-  const [incomeType, setIncomeType] = useState<IncomeType>("self-employed");
-  const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
+  useEffect(() => {
+    // Load Brevo stylesheet
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://sibforms.com/forms/end-form/build/sib-styles.css";
+    document.head.appendChild(link);
+    return () => { document.head.removeChild(link); };
+  }, []);
 
-    // Pull enrichment data from the completed analysis if available
-    let businessType: string | undefined;
-    let totalMissedDeductions: number | undefined;
-    try {
-      const stored = sessionStorage.getItem("taxAnalysis");
-      if (stored) {
-        const analysis = JSON.parse(stored);
-        businessType = analysis.businessType;
-        totalMissedDeductions = analysis.totalMissedDeductions;
-      }
-    } catch {}
+  useEffect(() => {
+    // Intercept Brevo form submit: save to sessionStorage, fire to Brevo in
+    // background, then navigate to /results without waiting for Brevo's redirect.
+    const attach = () => {
+      const form = document.getElementById("sib-form") as HTMLFormElement | null;
+      if (!form) return false;
 
-    // Fire-and-forget — don't block navigation on Zapier
-    fetch("/api/leads", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        firstName,
-        email,
-        incomeType,
-        businessType,
-        totalMissedDeductions,
-        submittedAt: new Date().toISOString(),
-      }),
-    }).catch(() => {});
+      form.addEventListener("submit", (e) => {
+        const firstName = (document.getElementById("FIRSTNAME") as HTMLInputElement)?.value ?? "";
+        const email = (document.getElementById("EMAIL") as HTMLInputElement)?.value ?? "";
+        sessionStorage.setItem("userSignup", JSON.stringify({ firstName, email }));
 
-    sessionStorage.setItem("userSignup", JSON.stringify({ firstName, email, incomeType }));
-    router.push("/results");
-  }
+        // Fire to Brevo in background (no-cors — response is opaque, errors silently ignored)
+        fetch(form.action, { method: "POST", mode: "no-cors", body: new FormData(form) }).catch(() => {});
+
+        e.preventDefault();
+        router.push("/results");
+      });
+      return true;
+    };
+
+    // Brevo's own JS may re-render the form; retry a few times
+    if (!attach()) {
+      const t = setTimeout(attach, 300);
+      return () => clearTimeout(t);
+    }
+  }, [router]);
 
   return (
     <main className="min-h-screen flex flex-col" style={{ background: "#f9f7f5" }}>
@@ -152,60 +117,20 @@ export default function SignUpPage() {
         <img src={LOGO} alt="Taxfix" className="h-[27px] w-[96px] object-contain" />
       </header>
 
-      {/* Centered content */}
+      {/* Centered Brevo form */}
       <div className="flex flex-1 items-center justify-center px-4 py-[50px]">
-        <div className="flex flex-col gap-[30px] items-center w-full max-w-[960px]">
-          {/* Heading */}
-          <div className="flex flex-col gap-[6px] items-center text-center">
-            <h1 className="text-[30px] text-black" style={{ fontWeight: 700, lineHeight: 1.2 }}>
-              Your tax summary is almost ready
-            </h1>
-            <p
-              className="text-[14px] text-center"
-              style={{ color: "rgba(12,11,10,0.6)", lineHeight: 1.3, maxWidth: 394 }}
-            >
-              Enter your details to see where you could claim back tax and avoid leaving money on the table.
-            </p>
-          </div>
-
-          {/* Card */}
-          <div
-            className="bg-white w-full"
-            style={{
-              maxWidth: 500,
-              borderRadius: 24,
-              border: "2px solid #fdf8f2",
-              padding: "30px 36px",
-            }}
-          >
-            <form onSubmit={handleSubmit} className="flex flex-col gap-[12px]">
-              <FloatingInput
-                id="firstName"
-                label="First name"
-                value={firstName}
-                onChange={setFirstName}
-                required
-              />
-              <FloatingInput
-                id="email"
-                label="Email address"
-                type="email"
-                value={email}
-                onChange={setEmail}
-                required
-              />
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full h-[48px] rounded-[10px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all mt-[4px] disabled:opacity-60"
-                style={{ background: "#a0d766", fontWeight: 600 }}
-              >
-                Get my tax summary
-              </button>
-            </form>
-          </div>
-        </div>
+        <div
+          dangerouslySetInnerHTML={{ __html: BREVO_FORM_HTML }}
+          className="w-full"
+          style={{ maxWidth: 540 }}
+        />
       </div>
+
+      {/* Brevo JS */}
+      <Script
+        src="https://sibforms.com/forms/end-form/build/main.js"
+        strategy="lazyOnload"
+      />
     </main>
   );
 }

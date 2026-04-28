@@ -282,13 +282,13 @@ export default function ResultsPage() {
         <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.2, marginBottom: 6 }}>
           Here's your expenses checklist
         </p>
-        <p style={{ fontSize: 10, color: "rgba(12,11,10,0.6)", lineHeight: 1.3, maxWidth: 515 }}>
+        <p style={{ fontSize: 10, color: "rgba(12,11,10,0.6)", lineHeight: 1.3 }}>
           We've reviewed your Self Assessment tax return and identified expense categories that may apply to you. Use this checklist to see which expenses you've paid for and may be able to claim.
         </p>
       </div>
 
       {/* Category cards */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 515 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {analysis.canImprove.map((cat, i) => (
           <div
             key={i}

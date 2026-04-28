@@ -116,6 +116,7 @@ export default function SignUpPage() {
           border-radius: 15px !important;
           height: 50px !important;
           width: 100% !important;
+          padding-left: 16px !important;
         }
         #sib-container .sib-form-block__button {
           width: 100% !important;

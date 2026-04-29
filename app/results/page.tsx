@@ -420,7 +420,7 @@ export default function ResultsPage() {
             className="text-[14px] text-[rgba(12,11,10,0.6)] leading-[1.3] text-center"
             style={{ maxWidth: 600 }}
           >
-            {`We compared your SA103 return with others from people in a similar income bracket and the same type of income. Here's what's on your return — and what you might be missing. All numbers shown are illustrative only.`}
+            {`We compared your ${analysis.taxYear} tax return with others from people in a similar income bracket and the same type of income. Here's what's on your return — and what you might be missing. All numbers shown are illustrative only.`}
           </p>
         </div>
 

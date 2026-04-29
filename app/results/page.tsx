@@ -438,23 +438,31 @@ export default function ResultsPage() {
           ].filter(Boolean) as string[];
           return (
             <div
-              className="flex items-center gap-[16px] mx-auto px-[16px] py-[14px] rounded-[16px] bg-white w-full screen-only"
-              style={{ maxWidth: 900, border: "1px solid rgba(12,11,10,0.08)", marginTop: 16, marginBottom: 8 }}
+              className="flex items-center gap-[16px] p-[16px] mx-auto bg-white w-full screen-only"
+              style={{ maxWidth: 900, border: "1px solid rgba(12,11,10,0.08)", borderRadius: 16, marginTop: 16, marginBottom: 8 }}
             >
-              <div className="flex flex-col gap-[5px] flex-1 min-w-0">
+              {/* Left: name + income type */}
+              <div className="flex flex-[1_0_0] flex-col gap-[7px] items-start min-w-0">
                 {signup.firstName && (
-                  <p className="text-[18px] text-[#0c0b0a] leading-[20px] truncate" style={{ fontWeight: 500 }}>
+                  <p className="text-[18px] text-[#0c0b0a] leading-[20px] overflow-hidden text-ellipsis w-full" style={{ fontWeight: 500 }}>
                     {signup.firstName}
                   </p>
                 )}
-                <p className="text-[12px] text-[#96928e] leading-[1.3] tracking-wide">
+                <p className="text-[12px] text-[#96928e] leading-[1.3] whitespace-nowrap">
                   {analysis.incomeType?.toUpperCase()}
                 </p>
               </div>
+              {/* Right: pills */}
               {pills.length > 0 && (
-                <div className="flex gap-[8px] items-center flex-wrap justify-end shrink-0">
+                <div className="flex gap-[8px] items-center shrink-0">
                   {pills.map((pill) => (
-                    <span key={pill} className="chip-white text-[13px]">{pill}</span>
+                    <span
+                      key={pill}
+                      className="inline-flex items-center h-[32px] px-[12px] rounded-full text-[14px] text-[rgba(12,11,10,0.8)] whitespace-nowrap"
+                      style={{ background: "#f4f1f1", fontWeight: 400 }}
+                    >
+                      {pill}
+                    </span>
                   ))}
                 </div>
               )}

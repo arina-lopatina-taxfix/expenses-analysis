@@ -281,6 +281,68 @@ export default function ResultsPage() {
     );
   }
 
+  const isEligible = /self.?employ|landlord|property/i.test(analysis.incomeType ?? "");
+
+  if (!isEligible) {
+    return (
+      <main className="min-h-screen bg-white flex flex-col">
+        {/* App bar */}
+        <header
+          className="sticky top-0 z-20 bg-white flex items-center justify-center px-[64px]"
+          style={{ height: 75, boxShadow: "0px 0px 2px 0px rgba(0,0,0,0.08), 2px 4px 16px 0px rgba(0,0,0,0.08)" }}
+        >
+          <img src={LOGO} alt="Taxfix" className="h-[23px] w-[96px] object-contain" />
+        </header>
+
+        {/* Centered content */}
+        <div className="flex flex-1 items-center justify-center px-4">
+          <div className="flex flex-col gap-[24px] items-center w-[560px] max-w-full">
+            {/* Illustration */}
+            <img
+              src="https://www.figma.com/api/mcp/asset/dcca5b6c-e2bf-4498-853b-30d65023e67c"
+              alt=""
+              className="shrink-0 object-contain"
+              style={{ width: 250, height: 250 }}
+            />
+
+            {/* Text */}
+            <div className="flex flex-col gap-[6px] items-center text-center">
+              <p className="text-[30px] text-black" style={{ fontWeight: 700, lineHeight: 1.2 }}>
+                You can&apos;t claim expenses for this income type
+              </p>
+              <p className="text-[14px] text-[rgba(12,11,10,0.6)] leading-[1.3] text-center" style={{ maxWidth: 448 }}>
+                Because your income is from {analysis.incomeType}, expenses can&apos;t be claimed against it in your tax return. If you need additional support, our accredited accountants can help you make the most of your return.
+              </p>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-col gap-[8px] items-center w-[300px]">
+              <a
+                href="https://taxfix.com/en-uk/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
+                style={{ background: "#a0d766", fontWeight: 500 }}
+              >
+                Get help with Self Assessment
+              </a>
+              <button
+                onClick={() => router.push("/")}
+                className="flex items-center justify-center gap-[8px] h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
+                style={{ fontWeight: 500 }}
+              >
+                <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+                  <path d="M13 16l-6-6 6-6" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Start again
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <>
     {/* ── Print-only checklist ─────────────────────────────────────── */}

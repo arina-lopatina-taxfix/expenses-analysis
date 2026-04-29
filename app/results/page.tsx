@@ -248,6 +248,7 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
 export default function ResultsPage() {
   const router = useRouter();
   const [analysis, setAnalysis] = useState<TaxAnalysis | null>(null);
+  const [userProfile, setUserProfile] = useState<Record<string, boolean>>({});
 
   useEffect(() => { track("page_viewed", { page: "results" }); }, []);
 
@@ -266,6 +267,10 @@ export default function ResultsPage() {
     } else {
       setAnalysis(MOCK_DATA);
     }
+    try {
+      const profile = sessionStorage.getItem("userProfile");
+      if (profile) setUserProfile(JSON.parse(profile));
+    } catch { /* ignore */ }
   }, []);
 
   if (!analysis) {
@@ -392,10 +397,19 @@ export default function ResultsPage() {
           style={{ paddingTop: 45, paddingBottom: 36, gap: 6 }}
         >
           <p
-            className="text-[12px] text-center w-full"
-            style={{ fontWeight: 400, lineHeight: 1.3, color: "rgba(0,0,0,0.5)" }}
+            className="text-[12px] text-center w-full tracking-wide"
+            style={{ fontWeight: 400, lineHeight: 1.3, color: "#36893b" }}
           >
-            YOUR TAX RETURN {analysis.taxYear}
+            {[
+              analysis.incomeType?.toUpperCase(),
+              analysis.businessType?.toUpperCase(),
+              analysis.turnover ? `£${Number(analysis.turnover).toLocaleString("en-GB")}` : null,
+              userProfile.married ? "MARRIED" : null,
+              userProfile.dependants ? "DEPENDANTS" : null,
+              userProfile.studentLoan ? "STUDENT LOAN" : null,
+              userProfile.homeowner ? "HOMEOWNER" : null,
+              userProfile.renter ? "RENTER" : null,
+            ].filter(Boolean).join(" · ")}
           </p>
           <h1 className="text-[32px] text-black whitespace-nowrap" style={{ fontWeight: 700, lineHeight: 1.2 }}>
             You could have claimed{" "}

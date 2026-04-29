@@ -424,52 +424,6 @@ export default function ResultsPage() {
           </p>
         </div>
 
-        {/* User summary card */}
-        {(() => {
-          const signup = (() => { try { const s = sessionStorage.getItem("userSignup"); return s ? JSON.parse(s) : {}; } catch { return {}; } })();
-          const pills = [
-            analysis.businessType,
-            analysis.turnover ? `£${Number(analysis.turnover).toLocaleString("en-GB")}` : null,
-            userProfile.married ? "Married" : null,
-            userProfile.dependants ? "Dependants" : null,
-            userProfile.studentLoan ? "Student loan" : null,
-            userProfile.homeowner ? "Homeowner" : null,
-            userProfile.renter ? "Renter" : null,
-          ].filter(Boolean) as string[];
-          return (
-            <div
-              className="flex items-center gap-[16px] p-[16px] mx-auto bg-white w-full screen-only"
-              style={{ maxWidth: 900, border: "1px solid rgba(12,11,10,0.08)", borderRadius: 16, marginTop: 16, marginBottom: 8 }}
-            >
-              {/* Left: name + income type */}
-              <div className="flex flex-[1_0_0] flex-col gap-[7px] items-start min-w-0">
-                {signup.firstName && (
-                  <p className="text-[18px] text-[#0c0b0a] leading-[20px] overflow-hidden text-ellipsis w-full" style={{ fontWeight: 500 }}>
-                    {signup.firstName}
-                  </p>
-                )}
-                <p className="text-[12px] text-[#96928e] leading-[1.3] whitespace-nowrap">
-                  {analysis.incomeType?.toUpperCase()}
-                </p>
-              </div>
-              {/* Right: pills */}
-              {pills.length > 0 && (
-                <div className="flex gap-[8px] items-center shrink-0">
-                  {pills.map((pill) => (
-                    <span
-                      key={pill}
-                      className="inline-flex items-center h-[32px] px-[12px] rounded-full text-[14px] text-[rgba(12,11,10,0.8)] whitespace-nowrap"
-                      style={{ background: "#f4f1f1", fontWeight: 400 }}
-                    >
-                      {pill}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
         {/* Beige content section */}
         <div
           className="px-4 xl:px-16"
@@ -477,7 +431,7 @@ export default function ResultsPage() {
             background: "#f9f7f5",
             borderTopLeftRadius: 30,
             borderTopRightRadius: 30,
-            paddingTop: 51,
+            paddingTop: 37,
             paddingBottom: 48,
           }}
         >
@@ -485,6 +439,50 @@ export default function ResultsPage() {
             className="flex flex-col mx-auto"
             style={{ gap: 48, maxWidth: 900 }}
           >
+            {/* User summary card */}
+            {(() => {
+              const signup = (() => { try { const s = sessionStorage.getItem("userSignup"); return s ? JSON.parse(s) : {}; } catch { return {}; } })();
+              const pills = [
+                analysis.businessType,
+                analysis.turnover ? `£${Number(analysis.turnover).toLocaleString("en-GB")}` : null,
+                userProfile.married ? "Married" : null,
+                userProfile.dependants ? "Dependants" : null,
+                userProfile.studentLoan ? "Student loan" : null,
+                userProfile.homeowner ? "Homeowner" : null,
+                userProfile.renter ? "Renter" : null,
+              ].filter(Boolean) as string[];
+              return (
+                <div
+                  className="flex items-center gap-[16px] p-[16px] bg-white w-full screen-only"
+                  style={{ border: "1px solid rgba(12,11,10,0.08)", borderRadius: 16 }}
+                >
+                  <div className="flex flex-[1_0_0] flex-col gap-[7px] items-start min-w-0">
+                    {signup.firstName && (
+                      <p className="text-[18px] text-[#0c0b0a] leading-[20px] overflow-hidden text-ellipsis w-full" style={{ fontWeight: 500 }}>
+                        {signup.firstName}
+                      </p>
+                    )}
+                    <p className="text-[12px] text-[#96928e] leading-[1.3] whitespace-nowrap">
+                      {analysis.incomeType?.toUpperCase()}
+                    </p>
+                  </div>
+                  {pills.length > 0 && (
+                    <div className="flex gap-[8px] items-center shrink-0">
+                      {pills.map((pill) => (
+                        <span
+                          key={pill}
+                          className="inline-flex items-center h-[32px] px-[12px] rounded-[8px] text-[14px] text-[rgba(12,11,10,0.8)] whitespace-nowrap"
+                          style={{ background: "#f4f1f1", fontWeight: 400 }}
+                        >
+                          {pill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* Section 1 — Already expensing */}
             <div className="flex flex-col w-full" style={{ gap: 16 }}>
               <div className="flex items-center justify-between w-full">

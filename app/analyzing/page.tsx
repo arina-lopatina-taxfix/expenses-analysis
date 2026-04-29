@@ -75,35 +75,37 @@ export default function AnalyzingPage() {
   }, []);
 
   return (
-    <main className="bg-white relative min-h-screen">
+    <main className="bg-white min-h-screen flex flex-col">
       {/* Logo */}
-      <div className="-translate-x-1/2 absolute h-[27px] left-1/2 top-[32px] w-[96px]">
+      <header className="flex items-center justify-center pt-8 pb-2 shrink-0">
         <img alt="Taxfix" className="h-[23px] w-[96px] object-contain" src={LOGO} />
-      </div>
+      </header>
 
       {/* Content */}
-      <div className="-translate-x-1/2 -translate-y-1/2 absolute flex flex-col gap-[24px] items-center left-1/2 top-[calc(50%+19.5px)]">
-        <div className="h-[255px] relative shrink-0 w-[256px]">
-          <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={ILLUSTRATION} />
-        </div>
-        <div className="flex flex-col gap-[9px] items-center justify-center leading-[1.3] text-center whitespace-nowrap">
-          {STAGES.map((stage, i) => {
-            const isActive = i === activeStage;
-            return (
-              <p
-                key={stage}
-                className="transition-all duration-700 relative shrink-0"
-                style={{
-                  fontSize: isActive ? 28 : 16,
-                  fontWeight: isActive ? 700 : 400,
-                  color: isActive ? "#0c0b0a" : "rgba(12,11,10,0.4)",
-                  lineHeight: 1.3,
-                }}
-              >
-                {stage}
-              </p>
-            );
-          })}
+      <div className="flex flex-1 flex-col items-center justify-center px-4 py-8">
+        <div className="flex flex-col gap-[24px] items-center">
+          <div className="h-[255px] relative shrink-0 w-[256px]">
+            <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={ILLUSTRATION} />
+          </div>
+          <div className="flex flex-col gap-[9px] items-center justify-center leading-[1.3] text-center">
+            {STAGES.map((stage, i) => {
+              const isActive = i === activeStage;
+              return (
+                <p
+                  key={stage}
+                  className="transition-all duration-700 relative shrink-0"
+                  style={{
+                    fontSize: isActive ? 28 : 16,
+                    fontWeight: isActive ? 700 : 400,
+                    color: isActive ? "#0c0b0a" : "rgba(12,11,10,0.4)",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {stage}
+                </p>
+              );
+            })}
+          </div>
         </div>
       </div>
     </main>

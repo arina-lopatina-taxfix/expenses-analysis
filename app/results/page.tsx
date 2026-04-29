@@ -288,7 +288,7 @@ export default function ResultsPage() {
       <main className="min-h-screen bg-white flex flex-col">
         {/* App bar */}
         <header
-          className="sticky top-0 z-20 bg-white flex items-center justify-center px-[64px]"
+          className="sticky top-0 z-20 bg-white flex items-center justify-center px-4"
           style={{ height: 75, boxShadow: "0px 0px 2px 0px rgba(0,0,0,0.08), 2px 4px 16px 0px rgba(0,0,0,0.08)" }}
         >
           <img src={LOGO} alt="Taxfix" className="h-[23px] w-[96px] object-contain" />
@@ -316,7 +316,7 @@ export default function ResultsPage() {
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-col gap-[8px] items-center w-[300px]">
+            <div className="flex flex-col gap-[8px] items-center w-full max-w-[300px]">
               <a
                 href="https://taxfix.com/en-uk/"
                 target="_blank"
@@ -428,7 +428,7 @@ export default function ResultsPage() {
     <div className="screen-only min-h-screen bg-white flex flex-col">
       {/* App bar */}
       <header
-        className="sticky top-0 z-20 bg-white flex items-center justify-center px-[64px]"
+        className="sticky top-0 z-20 bg-white flex items-center justify-center px-4"
         style={{
           height: 75,
           boxShadow: "0px 0px 2px 0px rgba(0,0,0,0.08), 2px 4px 16px 0px rgba(0,0,0,0.08)",
@@ -464,7 +464,7 @@ export default function ResultsPage() {
           >
             TAX RETURN {analysis.taxYear}
           </p>
-          <h1 className="text-[32px] text-black whitespace-nowrap" style={{ fontWeight: 700, lineHeight: 1.2 }}>
+          <h1 className="text-[32px] text-black text-center" style={{ fontWeight: 700, lineHeight: 1.2 }}>
             You could have claimed{" "}
             <span style={{ color: "#36893b" }}>{fmt(analysis.totalMissedDeductions)}</span>
             {" "}more
@@ -520,7 +520,7 @@ export default function ResultsPage() {
                     </p>
                   </div>
                   {pills.length > 0 && (
-                    <div className="flex gap-[8px] items-center shrink-0">
+                    <div className="flex flex-wrap gap-[8px] items-center">
                       {pills.map((pill) => (
                         <span
                           key={pill}
@@ -587,12 +587,12 @@ export default function ResultsPage() {
 
       {/* Footer */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-20 bg-white"
+        className="fixed bottom-0 left-0 right-0 z-20 bg-white flex items-center justify-between px-4"
         style={{ height: 80, borderTop: "1px solid #f2efed" }}
       >
         <button
           onClick={() => router.push("/upload")}
-          className="absolute flex gap-[8px] items-center left-[39px] top-1/2 -translate-y-1/2 text-[#154618] text-[16px] hover:opacity-70 transition-opacity"
+          className="flex gap-[8px] items-center text-[#154618] text-[16px] hover:opacity-70 transition-opacity"
           style={{ fontWeight: 500 }}
         >
           <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
@@ -602,7 +602,7 @@ export default function ResultsPage() {
         </button>
         <button
           onClick={() => window.print()}
-          className="absolute bg-[#a0d766] h-[48px] right-[20px] top-1/2 -translate-y-1/2 rounded-[10px] px-[20px] flex items-center gap-[8px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
+          className="bg-[#a0d766] h-[48px] rounded-[10px] px-[20px] flex items-center gap-[8px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
           style={{ fontWeight: 600 }}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

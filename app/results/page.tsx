@@ -398,18 +398,9 @@ export default function ResultsPage() {
         >
           <p
             className="text-[12px] text-center w-full tracking-wide"
-            style={{ fontWeight: 400, lineHeight: 1.3, color: "#36893b" }}
+            style={{ fontWeight: 400, lineHeight: 1.3, color: "#96928e" }}
           >
-            {[
-              analysis.incomeType?.toUpperCase(),
-              analysis.businessType?.toUpperCase(),
-              analysis.turnover ? `£${Number(analysis.turnover).toLocaleString("en-GB")}` : null,
-              userProfile.married ? "MARRIED" : null,
-              userProfile.dependants ? "DEPENDANTS" : null,
-              userProfile.studentLoan ? "STUDENT LOAN" : null,
-              userProfile.homeowner ? "HOMEOWNER" : null,
-              userProfile.renter ? "RENTER" : null,
-            ].filter(Boolean).join(" · ")}
+            TAX RETURN {analysis.taxYear}
           </p>
           <h1 className="text-[32px] text-black whitespace-nowrap" style={{ fontWeight: 700, lineHeight: 1.2 }}>
             You could have claimed{" "}

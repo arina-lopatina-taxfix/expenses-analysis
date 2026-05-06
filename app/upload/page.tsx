@@ -75,7 +75,7 @@ export default function UploadPage() {
               Upload your tax return
             </p>
             <p className="text-[14px] leading-[1.3] text-[rgba(12,11,10,0.6)] text-center w-full">
-              {"Upload any year's Self Assessment and we'll identify all the allowable deductions and what you have been missing"}
+              {"Upload any self assessment and we'll find any possible allowable deductions you might have missed."}
             </p>
           </div>
 

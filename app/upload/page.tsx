@@ -3,12 +3,13 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
-import { upload } from "@vercel/blob/client";
 import { pdfStore } from "@/lib/pdfStore";
 
 const LOGO = "/logo.png";
 const DOC_SHADOW = "https://www.figma.com/api/mcp/asset/241ae416-cf71-4622-9cce-d9df9d3ae161";
 const DOC_ILLUSTRATION = "https://www.figma.com/api/mcp/asset/c139c461-5ba5-47a3-8412-fc94ab09a652";
+
+const MAX_MB = 4;
 
 export default function UploadPage() {
   const router = useRouter();
@@ -18,13 +19,15 @@ export default function UploadPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const handleFile = useCallback((f: File) => {
     if (f.type !== "application/pdf") {
       setError("Please upload a PDF file.");
+      return;
+    }
+    if (f.size > MAX_MB * 1024 * 1024) {
+      setError(`File is too large. Please upload a PDF under ${MAX_MB} MB.`);
       return;
     }
     setError(null);
@@ -41,28 +44,13 @@ export default function UploadPage() {
     [handleFile]
   );
 
-  async function handleAnalyse() {
+  function handleAnalyse() {
     if (!file) {
       setError("Please select your tax return PDF.");
       return;
     }
-    setUploading(true);
-    setUploadProgress(0);
-    setError(null);
-    try {
-      const blob = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/blob-upload",
-        onUploadProgress: ({ percentage }) => setUploadProgress(Math.round(percentage)),
-      });
-      pdfStore.setBlobUrl(blob.url);
-      router.push("/analyzing");
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(`Upload failed: ${msg}`);
-      setUploading(false);
-      setUploadProgress(0);
-    }
+    pdfStore.setFile(file);
+    router.push("/analyzing");
   }
 
   return (
@@ -159,13 +147,11 @@ export default function UploadPage() {
           <div className="flex flex-col gap-[34px] items-center w-full">
             <button
               onClick={handleAnalyse}
-              disabled={!file || uploading}
+              disabled={!file}
               className="bg-[#a0d766] h-[48px] rounded-[10px] w-full text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ fontWeight: 500 }}
             >
-              {uploading
-                ? uploadProgress > 0 ? `Uploading… ${uploadProgress}%` : "Preparing…"
-                : "Analyse my tax return"}
+              Analyse my tax return
             </button>
 
             {/* Trust badges */}

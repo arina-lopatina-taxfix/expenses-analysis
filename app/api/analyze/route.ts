@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI, createPartFromBase64, createPartFromText } from "@google/genai";
-import { del } from "@vercel/blob";
 import type { TaxAnalysis, ExpenseCategory, UserProfile } from "@/lib/types";
 
 export const maxDuration = 120;
@@ -273,28 +272,12 @@ export async function POST(request: NextRequest) {
     renter: false,
   };
 
-  let blobUrlToDelete: string | null = null;
-
   try {
-    const contentType = request.headers.get("content-type") ?? "";
-    let pdfBase64: string | null = null;
-    let bodyProfile: UserProfile | null = null;
-
-    if (contentType.includes("application/json")) {
-      const body = await request.json() as { pdfUrl?: string; profile?: UserProfile };
-      bodyProfile = body.profile ?? null;
-      if (body.pdfUrl) {
-        blobUrlToDelete = body.pdfUrl;
-        const resp = await fetch(body.pdfUrl);
-        pdfBase64 = Buffer.from(await resp.arrayBuffer()).toString("base64");
-      }
-    } else {
-      const formData = await request.formData();
-      const pdfFile = formData.get("pdf") as File | null;
-      const profileRaw = (formData.get("profile") as string | null) ?? "{}";
-      bodyProfile = JSON.parse(profileRaw) as UserProfile;
-      if (pdfFile) pdfBase64 = Buffer.from(await pdfFile.arrayBuffer()).toString("base64");
-    }
+    const formData = await request.formData();
+    const pdfFile = formData.get("pdf") as File | null;
+    const profileRaw = (formData.get("profile") as string | null) ?? "{}";
+    const bodyProfile = JSON.parse(profileRaw) as UserProfile;
+    const pdfBase64 = pdfFile ? Buffer.from(await pdfFile.arrayBuffer()).toString("base64") : null;
 
     profile = bodyProfile || profile;
 
@@ -406,13 +389,11 @@ Generate specific missed deduction categories for this person. Apply all relevan
       totalMissedDeductions: sumDeductions(canImprove),
     };
 
-    if (blobUrlToDelete) del(blobUrlToDelete).catch(() => {});
     return NextResponse.json(analysis);
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Analysis error:", errMsg);
     console.error("Detail:", JSON.stringify(error, Object.getOwnPropertyNames(error ?? {})));
-    if (blobUrlToDelete) del(blobUrlToDelete).catch(() => {});
     return NextResponse.json({ ...getMockData(profile), isExample: true, errorDetail: errMsg });
   }
 }

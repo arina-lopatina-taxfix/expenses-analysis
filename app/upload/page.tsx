@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
+import { usePageFlag } from "@/lib/usePageFlag";
 import { pdfStore } from "@/lib/pdfStore";
 
 const LOGO = "/logo.png";
@@ -13,8 +14,11 @@ const MAX_MB = 4;
 
 export default function UploadPage() {
   const router = useRouter();
+  const pageEnabled = usePageFlag("upload-page");
 
   useEffect(() => { track("page_viewed", { page: "upload" }); }, []);
+
+  if (!pageEnabled) return null;
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);

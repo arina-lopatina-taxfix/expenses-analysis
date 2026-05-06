@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
+import { usePageFlag } from "@/lib/usePageFlag";
 import type { UserProfile } from "@/lib/types";
 
 const LOGO = "/logo.png";
@@ -17,8 +18,11 @@ const OPTIONS: { key: keyof UserProfile; label: string }[] = [
 
 export default function ProfilePage() {
   const router = useRouter();
+  const pageEnabled = usePageFlag("profile-page");
 
   useEffect(() => { track("page_viewed", { page: "profile" }); }, []);
+
+  if (!pageEnabled) return null;
 
   const [profile, setProfile] = useState<UserProfile>({
     married: false,

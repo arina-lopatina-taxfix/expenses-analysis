@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
+import { usePageFlag } from "@/lib/usePageFlag";
 import { pdfStore } from "@/lib/pdfStore";
 
 const LOGO = "/logo.png";
@@ -16,10 +17,13 @@ const STAGES = [
 
 export default function AnalyzingPage() {
   const router = useRouter();
+  const pageEnabled = usePageFlag("analyzing-page");
   const [activeStage, setActiveStage] = useState(0);
   const hasFetched = useRef(false);
 
   useEffect(() => { track("page_viewed", { page: "analyzing" }); }, []);
+
+  if (!pageEnabled) return null;
 
   useEffect(() => {
     const interval = setInterval(() => {

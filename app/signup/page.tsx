@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { track } from "@vercel/analytics";
+import { usePageFlag } from "@/lib/usePageFlag";
 
 const LOGO = "/logo.png";
 
@@ -67,8 +68,11 @@ const BREVO_FORM_HTML = `
 
 export default function SignUpPage() {
   const router = useRouter();
+  const pageEnabled = usePageFlag("signup-page");
 
   useEffect(() => { track("page_viewed", { page: "signup" }); }, []);
+
+  if (!pageEnabled) return null;
 
   useEffect(() => {
     // Load Brevo stylesheet

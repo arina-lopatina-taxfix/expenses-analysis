@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
+import { usePageFlag } from "@/lib/usePageFlag";
 import type { TaxAnalysis, ExpenseCategory } from "@/lib/types";
 
 const LOGO = "/logo.png";
@@ -248,10 +249,13 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
 
 export default function ResultsPage() {
   const router = useRouter();
+  const pageEnabled = usePageFlag("results-page");
   const [analysis, setAnalysis] = useState<TaxAnalysis | null>(null);
   const [userProfile, setUserProfile] = useState<Record<string, boolean>>({});
 
   useEffect(() => { track("page_viewed", { page: "results" }); }, []);
+
+  if (!pageEnabled) return null;
 
   useEffect(() => {
     const stored = sessionStorage.getItem("taxAnalysis");

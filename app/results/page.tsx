@@ -470,7 +470,7 @@ export default function ResultsPage() {
             TAX RETURN {analysis.taxYear}
           </p>
           <h1 className="text-[32px] text-black text-center" style={{ fontWeight: 700, lineHeight: 1.2 }}>
-            You could have claimed{" "}
+            People in your position have claimed up to{" "}
             <span style={{ color: "#36893b" }}>{fmt(analysis.totalMissedDeductions)}</span>
             {" "}more
           </h1>

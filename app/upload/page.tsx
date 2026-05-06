@@ -19,6 +19,7 @@ export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const handleFile = useCallback((f: File) => {
@@ -46,18 +47,22 @@ export default function UploadPage() {
       return;
     }
     setUploading(true);
+    setUploadProgress(0);
     setError(null);
     try {
       const blob = await upload(file.name, file, {
         access: "public",
         handleUploadUrl: "/api/blob-upload",
+        onUploadProgress: ({ percentage }) => setUploadProgress(Math.round(percentage)),
       });
       pdfStore.setBlobUrl(blob.url);
-    } catch {
-      // Blob not configured locally — fall back to in-memory file
-      pdfStore.setFile(file);
+      router.push("/analyzing");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Upload failed: ${msg}`);
+      setUploading(false);
+      setUploadProgress(0);
     }
-    router.push("/analyzing");
   }
 
   return (
@@ -158,7 +163,9 @@ export default function UploadPage() {
               className="bg-[#a0d766] h-[48px] rounded-[10px] w-full text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ fontWeight: 500 }}
             >
-              {uploading ? "Preparing…" : "Analyse my tax return"}
+              {uploading
+                ? uploadProgress > 0 ? `Uploading… ${uploadProgress}%` : "Preparing…"
+                : "Analyse my tax return"}
             </button>
 
             {/* Trust badges */}

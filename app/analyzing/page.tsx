@@ -55,7 +55,8 @@ export default function AnalyzingPage() {
 
         const analysis = await response.json();
         sessionStorage.setItem("taxAnalysis", JSON.stringify(analysis));
-        router.push("/signup");
+        const isEligible = /self.?employ|landlord|property/i.test(analysis.incomeType ?? "");
+        router.push(isEligible ? "/signup" : "/results");
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         sessionStorage.setItem("taxAnalysis", JSON.stringify({

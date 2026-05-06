@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
+import { pdfStore } from "@/lib/pdfStore";
 
 const LOGO = "/logo.png";
 const ILLUSTRATION = "https://www.figma.com/api/mcp/asset/9e612669-f595-4428-ad88-9ceacf67ca90";
@@ -33,9 +34,9 @@ export default function AnalyzingPage() {
 
     async function runAnalysis() {
       try {
-        const pdfBase64 = sessionStorage.getItem("pdfBase64");
+        const pdfBase64 = pdfStore.getBase64();
         const profileRaw = sessionStorage.getItem("userProfile") || "{}";
-        const pdfName = sessionStorage.getItem("pdfName") || "tax-return.pdf";
+        const pdfName = pdfStore.getName();
 
         const response = await fetch("/api/analyze", {
           method: "POST",

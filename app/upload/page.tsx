@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
+import { pdfStore } from "@/lib/pdfStore";
 
 const LOGO = "/logo.png";
 const DOC_SHADOW = "https://www.figma.com/api/mcp/asset/241ae416-cf71-4622-9cce-d9df9d3ae161";
@@ -48,8 +49,7 @@ export default function UploadPage() {
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = (reader.result as string).split(",")[1];
-      sessionStorage.setItem("pdfBase64", base64);
-      sessionStorage.setItem("pdfName", file.name);
+      pdfStore.set(base64, file.name);
       router.push("/analyzing");
     };
     reader.readAsDataURL(file);

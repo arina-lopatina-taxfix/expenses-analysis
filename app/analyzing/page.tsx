@@ -34,18 +34,16 @@ export default function AnalyzingPage() {
 
     async function runAnalysis() {
       try {
-        const pdfBase64 = pdfStore.getBase64();
+        const pdfFile = pdfStore.get();
         const profileRaw = sessionStorage.getItem("userProfile") || "{}";
-        const pdfName = pdfStore.getName();
+
+        const formData = new FormData();
+        if (pdfFile) formData.append("pdf", pdfFile);
+        formData.append("profile", profileRaw);
 
         const response = await fetch("/api/analyze", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            pdfBase64,
-            pdfName,
-            profile: JSON.parse(profileRaw),
-          }),
+          body: formData,
         });
 
         if (!response.ok) {

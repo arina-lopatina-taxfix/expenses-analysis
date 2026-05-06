@@ -39,20 +39,15 @@ export default function UploadPage() {
     [handleFile]
   );
 
-  async function handleAnalyse() {
+  function handleAnalyse() {
     if (!file) {
       setError("Please select your tax return PDF.");
       return;
     }
     setUploading(true);
     setError(null);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = (reader.result as string).split(",")[1];
-      pdfStore.set(base64, file.name);
-      router.push("/analyzing");
-    };
-    reader.readAsDataURL(file);
+    pdfStore.set(file);
+    router.push("/analyzing");
   }
 
   return (

@@ -273,13 +273,15 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    const body = await request.json();
-    const { pdfBase64, profile: bodyProfile } = body as {
-      pdfBase64: string | null;
-      pdfName: string;
-      profile: UserProfile;
-    };
+    const formData = await request.formData();
+    const pdfFile = formData.get("pdf") as File | null;
+    const profileRaw = (formData.get("profile") as string | null) ?? "{}";
+    const bodyProfile = JSON.parse(profileRaw) as UserProfile;
     profile = bodyProfile || profile;
+
+    const pdfBase64 = pdfFile
+      ? Buffer.from(await pdfFile.arrayBuffer()).toString("base64")
+      : null;
 
     console.log("Starting analysis. PDF provided:", !!pdfBase64, "Profile:", JSON.stringify(profile));
 

@@ -34,17 +34,23 @@ export default function AnalyzingPage() {
 
     async function runAnalysis() {
       try {
-        const pdfFile = pdfStore.get();
         const profileRaw = sessionStorage.getItem("userProfile") || "{}";
+        const blobUrl = pdfStore.getBlobUrl();
+        const pdfFile = pdfStore.getFile();
 
-        const formData = new FormData();
-        if (pdfFile) formData.append("pdf", pdfFile);
-        formData.append("profile", profileRaw);
-
-        const response = await fetch("/api/analyze", {
-          method: "POST",
-          body: formData,
-        });
+        let response: Response;
+        if (blobUrl) {
+          response = await fetch("/api/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pdfUrl: blobUrl, profile: JSON.parse(profileRaw) }),
+          });
+        } else {
+          const formData = new FormData();
+          if (pdfFile) formData.append("pdf", pdfFile);
+          formData.append("profile", profileRaw);
+          response = await fetch("/api/analyze", { method: "POST", body: formData });
+        }
 
         if (!response.ok) {
           const errorText = await response.text().catch(() => `HTTP ${response.status}`);

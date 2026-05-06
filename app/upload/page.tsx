@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
+import { upload } from "@vercel/blob/client";
 import { pdfStore } from "@/lib/pdfStore";
 
 const LOGO = "/logo.png";
@@ -39,14 +40,23 @@ export default function UploadPage() {
     [handleFile]
   );
 
-  function handleAnalyse() {
+  async function handleAnalyse() {
     if (!file) {
       setError("Please select your tax return PDF.");
       return;
     }
     setUploading(true);
     setError(null);
-    pdfStore.set(file);
+    try {
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/blob-upload",
+      });
+      pdfStore.setBlobUrl(blob.url);
+    } catch {
+      // Blob not configured locally — fall back to in-memory file
+      pdfStore.setFile(file);
+    }
     router.push("/analyzing");
   }
 

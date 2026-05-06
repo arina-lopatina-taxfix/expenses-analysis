@@ -8,7 +8,19 @@ export const maxDuration = 120;
 
 const PROMPT_1 = `You are a UK tax expert. Read the uploaded SA100 Self Assessment PDF and extract the data.
 
-Read every page carefully — SA100, SA103S, SA103F, SA105.
+Read every page carefully — SA100, SA102, SA103S, SA103F, SA105.
+
+ELIGIBILITY — set isEligible based on which supplementary pages are present:
+- isEligible = true  if SA103S or SA103F (self-employment) OR SA105 (UK property/landlord) is included
+- isEligible = false if only SA102 (employment/PAYE) or no expense-bearing pages are present
+- When no PDF is provided, default isEligible = true
+
+incomeType: one short label describing the PRIMARY income source:
+- SA103S or SA103F present → "Self-employed"
+- SA105 present (and no SA103) → "Property income"
+- SA102 present (and no SA103/SA105) → "Employment"
+- Mixed → list the dominant one, e.g. "Self-employed"
+- Unknown → "Unknown"
 
 SA103S boxes:
 - Box 17: Total allowable expenses
@@ -41,12 +53,13 @@ For each box with a NON-ZERO value create one alreadyClaiming entry:
 
 If no expense boxes are filled, or no PDF provided, generate 2-3 realistic examples for a freelance consultant.
 
-businessType: copy verbatim from the business description field on SA103S/SA103F. If not present, infer from the expense pattern (e.g. "sole trader plumber" from tool and van costs). Be precise — "iOS mobile developer" not "consultant", "private music tutor" not "self-employed".
+businessType: copy verbatim from the business description field on SA103S/SA103F. If not present, infer from the expense pattern. Be precise — "iOS mobile developer" not "consultant".
 
 Return ONLY valid JSON, no markdown, no code fences:
 {
   "taxYear": "2024/25",
   "incomeType": "Self-employed",
+  "isEligible": true,
   "businessType": "Freelance iOS developer",
   "turnover": 45000,
   "alreadyClaiming": [
@@ -172,6 +185,7 @@ function getMockData(profile: UserProfile): TaxAnalysis {
   return {
     taxYear: "2024/25",
     incomeType: "Self-employed",
+    isEligible: true,
     businessType: "Freelance professional",
     totalMissedDeductions: 3584,
     alreadyClaiming,
@@ -312,6 +326,7 @@ export async function POST(request: NextRequest) {
     const step1 = JSON.parse(raw1) as {
       taxYear: string;
       incomeType: string;
+      isEligible: boolean;
       businessType?: string;
       turnover?: number;
       alreadyClaiming: ExpenseCategory[];
@@ -382,6 +397,7 @@ Generate specific missed deduction categories for this person. Apply all relevan
     const analysis: TaxAnalysis = {
       taxYear: step1.taxYear,
       incomeType: step1.incomeType,
+      isEligible: step1.isEligible ?? true,
       businessType: step1.businessType,
       turnover: step1.turnover,
       alreadyClaiming: step1.alreadyClaiming || [],

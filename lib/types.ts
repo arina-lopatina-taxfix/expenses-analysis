@@ -16,6 +16,7 @@ export interface ExpenseCategory {
 export interface TaxAnalysis {
   taxYear: string;
   incomeType: string;
+  isEligible: boolean;
   businessType?: string;
   turnover?: number;
   totalMissedDeductions: number;

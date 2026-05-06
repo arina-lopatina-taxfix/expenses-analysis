@@ -10,6 +10,7 @@ const LOGO = "/logo.png";
 const MOCK_DATA: TaxAnalysis = {
   taxYear: "2024/25",
   incomeType: "Self-employed",
+  isEligible: true,
   businessType: "Freelance consultant",
   totalMissedDeductions: 6034,
   alreadyClaiming: [
@@ -281,7 +282,7 @@ export default function ResultsPage() {
     );
   }
 
-  const isEligible = /self.?employ|landlord|property/i.test(analysis.incomeType ?? "");
+  const isEligible = analysis.isEligible !== false;
 
   if (!isEligible) {
     return (

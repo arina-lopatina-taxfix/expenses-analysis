@@ -7,8 +7,7 @@ import { usePageFlag } from "@/lib/usePageFlag";
 import { pdfStore } from "@/lib/pdfStore";
 
 const LOGO = "/logo.png";
-const DOC_SHADOW = "https://www.figma.com/api/mcp/asset/241ae416-cf71-4622-9cce-d9df9d3ae161";
-const DOC_ILLUSTRATION = "https://www.figma.com/api/mcp/asset/c139c461-5ba5-47a3-8412-fc94ab09a652";
+const DOC_ILLUSTRATION = "/Document.png";
 
 const MAX_MB = 4;
 
@@ -68,27 +67,7 @@ export default function UploadPage() {
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-8">
         <div className="flex flex-col gap-[24px] items-center w-full max-w-[600px]">
           {/* Document illustration with shadow */}
-          <div className="relative shrink-0 size-[170px]">
-            <div
-              className="absolute overflow-hidden pointer-events-none"
-              style={{ inset: "56.6% 0 0 0", opacity: 0.04 }}
-            >
-              <img
-                alt=""
-                className="absolute max-w-none"
-                style={{ height: "116.67%", left: "1.71%", top: 0, width: "100.13%" }}
-                src={DOC_SHADOW}
-              />
-            </div>
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <img
-                alt=""
-                className="absolute max-w-none"
-                style={{ height: "112.56%", left: "-0.04%", top: "-12.56%", width: "108.33%" }}
-                src={DOC_ILLUSTRATION}
-              />
-            </div>
-          </div>
+          <img alt="" src={DOC_ILLUSTRATION} className="shrink-0 object-contain" style={{ width: 170, height: 170 }} />
 
           {/* Heading */}
           <div className="flex flex-col gap-[6px] items-center justify-center">

@@ -304,7 +304,7 @@ export default function ResultsPage() {
           <div className="flex flex-col gap-[24px] items-center w-[560px] max-w-full">
             {/* Illustration */}
             <img
-              src="https://www.figma.com/api/mcp/asset/dcca5b6c-e2bf-4498-853b-30d65023e67c"
+              src="/large.png"
               alt=""
               className="shrink-0 object-contain"
               style={{ width: 250, height: 250 }}

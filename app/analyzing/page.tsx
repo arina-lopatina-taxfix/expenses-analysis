@@ -7,7 +7,7 @@ import { usePageFlag } from "@/lib/usePageFlag";
 import { pdfStore } from "@/lib/pdfStore";
 
 const LOGO = "/logo.png";
-const ILLUSTRATION = "https://www.figma.com/api/mcp/asset/9e612669-f595-4428-ad88-9ceacf67ca90";
+const ILLUSTRATION = "/prefill-optin.png";
 
 const STAGES = [
   "Reading your return…",

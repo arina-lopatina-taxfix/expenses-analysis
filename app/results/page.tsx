@@ -287,6 +287,14 @@ export default function ResultsPage() {
   const isEligible = analysis.isEligible !== false;
 
   if (!isEligible) {
+    const reliefs: string[] = ["pension tax relief"];
+    if (userProfile.married) reliefs.push("the Marriage Allowance");
+    if (userProfile.studentLoan) reliefs.push("student loan relief");
+    const reliefList =
+      reliefs.length === 1
+        ? reliefs[0]
+        : reliefs.slice(0, -1).join(", ") + " or " + reliefs[reliefs.length - 1];
+
     return (
       <main className="min-h-screen bg-white flex flex-col">
         {/* Centered content */}
@@ -303,11 +311,16 @@ export default function ResultsPage() {
             {/* Text */}
             <div className="flex flex-col gap-[6px] items-center text-center">
               <p className="text-[30px] text-black" style={{ fontWeight: 700, lineHeight: 1.2 }}>
-                You can&apos;t claim expenses for this income type
+                Don&apos;t miss out on tax reliefs you could claim
               </p>
-              <p className="text-[14px] text-[rgba(12,11,10,0.6)] leading-[1.3] text-center" style={{ maxWidth: 448 }}>
-                Because your income is from {analysis.incomeType}, expenses can&apos;t be claimed against it in your tax return. If you need additional support, our accredited accountants can help you make the most of your return.
-              </p>
+              <div className="text-[14px] text-[rgba(12,11,10,0.6)] leading-[1.3] text-center" style={{ maxWidth: 514 }}>
+                <p className="mb-[6px]">
+                  If your income is from {analysis.incomeType}, expenses can&apos;t be deducted from it in your tax return. But that doesn&apos;t mean you can&apos;t save money.
+                </p>
+                <p>
+                  But you still will be able to claim tax reliefs such as {reliefList}. File your next tax return with us and make sure you claim everything you&apos;re entitled to.
+                </p>
+              </div>
             </div>
 
             {/* CTAs */}
@@ -319,7 +332,7 @@ export default function ResultsPage() {
                 className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
                 style={{ background: "#a0d766", fontWeight: 500 }}
               >
-                Get help with Self Assessment
+                Get help with my tax return
               </a>
               <button
                 onClick={() => router.push("/")}

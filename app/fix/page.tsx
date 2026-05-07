@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
 
 const ILLUSTRATION_AMENDMENT = "/fix-amendment.png";
 const ILLUSTRATION_FILE = "/fix-file.png";
 
 export default function FixPage() {
-  const router = useRouter();
   const [taxYear, setTaxYear] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,23 +48,37 @@ export default function FixPage() {
 
         {/* CTAs */}
         <div className="flex flex-col gap-[8px] items-center w-full max-w-[300px]">
-          <a
-            href="https://taxfix.com/en-uk/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
-            style={{ background: "#a0d766", fontWeight: 500 }}
-          >
-            {isCurrentYear ? "Get help with amendment" : "File my tax return"}
-          </a>
-          {isCurrentYear && (
-            <button
-              onClick={() => router.push("/")}
-              className="flex items-center justify-center h-[48px] w-full text-[16px] text-[#154618] hover:opacity-70 transition-opacity"
-              style={{ fontWeight: 500 }}
+          {isCurrentYear ? (
+            <>
+              <a
+                href="https://calendly.com/nik-sheth-taxfix/30min"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
+                style={{ background: "#a0d766", fontWeight: 500 }}
+              >
+                Get help with amendment
+              </a>
+              <a
+                href="https://taxfix.com/en-uk/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center h-[48px] w-full text-[16px] text-[#154618] hover:opacity-70 transition-opacity"
+                style={{ fontWeight: 500 }}
+              >
+                File my tax return
+              </a>
+            </>
+          ) : (
+            <a
+              href="https://taxfix.com/en-uk/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
+              style={{ background: "#a0d766", fontWeight: 500 }}
             >
               File my tax return
-            </button>
+            </a>
           )}
         </div>
       </div>

@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { track } from "@vercel/analytics";
 
-const ILLUSTRATION_AMENDMENT = "/fix-amendment.png";
-const ILLUSTRATION_FILE = "/fix-file.png";
+const ILLUSTRATION = "/list-tasks.png";
 
 export default function FixPage() {
   const [taxYear, setTaxYear] = useState<string | null>(null);
@@ -30,7 +29,7 @@ export default function FixPage() {
           <img
             alt=""
             className="absolute inset-0 object-cover size-full pointer-events-none"
-            src={isCurrentYear ? ILLUSTRATION_AMENDMENT : ILLUSTRATION_FILE}
+            src={ILLUSTRATION}
           />
         </div>
 

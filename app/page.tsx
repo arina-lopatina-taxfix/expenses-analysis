@@ -6,8 +6,6 @@ import { track } from "@vercel/analytics";
 import { usePageFlag } from "@/lib/usePageFlag";
 import type { UserProfile } from "@/lib/types";
 
-const LOGO = "/logo.png";
-
 const OPTIONS: { key: keyof UserProfile; label: string }[] = [
   { key: "married", label: "💍 Married" },
   { key: "dependants", label: "👶🏻 Dependants" },
@@ -43,11 +41,6 @@ export default function ProfilePage() {
 
   return (
     <main className="bg-white min-h-screen flex flex-col">
-      {/* Logo */}
-      <header className="flex items-center justify-center pt-8 pb-2 shrink-0">
-        <img alt="Taxfix" className="h-[23px] w-[96px] object-contain" src={LOGO} />
-      </header>
-
       {/* Content */}
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-8">
         <div className="flex flex-col gap-[36px] items-center w-full max-w-[560px]">

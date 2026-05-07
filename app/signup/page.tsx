@@ -6,8 +6,6 @@ import Script from "next/script";
 import { track } from "@vercel/analytics";
 import { usePageFlag } from "@/lib/usePageFlag";
 
-const LOGO = "/logo.png";
-
 const BREVO_FORM_HTML = `
 <div id="sib-container" class="sib-container--large sib-container--vertical" style="text-align:center; background-color:rgba(255,255,255,1); max-width:540px; border-radius:11px; border-width:0px; border-color:#C0CCD9; border-style:solid;">
   <form id="sib-form" method="POST" action="https://f261eed8.sibforms.com/serve/MUIFAOemvK9thqVxmi_0nOw0h_5iqdlmUB9nsoUk4fCMy5D3pfi-E21RovraavOT_XasAksNSWXqJjgiol5S2aC2Y2tx95jd2ZcWY1nYu7RaVQ9G67bjkJNwtbXkIoLbWLpLba-xwY4FYSWQfGwFqrh9oevNdBU1Fpmxodgb_15a3MeJWxAbEXKXsHamwo8FOboEoR2ebjI_o3b7">
@@ -133,17 +131,6 @@ export default function SignUpPage() {
           height: 20px !important;
         }
       `}</style>
-      {/* App bar */}
-      <header
-        className="sticky top-0 z-20 bg-white flex items-center justify-center px-[64px]"
-        style={{
-          height: 75,
-          boxShadow: "0px 0px 2px 0px rgba(0,0,0,0.08), 2px 4px 16px 0px rgba(0,0,0,0.08)",
-        }}
-      >
-        <img src={LOGO} alt="Taxfix" className="h-[23px] w-[96px] object-contain" />
-      </header>
-
       {/* Centered Brevo form */}
       <div className="flex flex-1 items-center justify-center px-4 py-[50px]">
         <div

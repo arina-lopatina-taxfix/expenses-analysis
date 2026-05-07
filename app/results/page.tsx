@@ -6,8 +6,6 @@ import { track } from "@vercel/analytics";
 import { usePageFlag } from "@/lib/usePageFlag";
 import type { TaxAnalysis, ExpenseCategory } from "@/lib/types";
 
-const LOGO = "/logo.png";
-
 const MOCK_DATA: TaxAnalysis = {
   taxYear: "2024/25",
   incomeType: "Self-employed",
@@ -291,14 +289,6 @@ export default function ResultsPage() {
   if (!isEligible) {
     return (
       <main className="min-h-screen bg-white flex flex-col">
-        {/* App bar */}
-        <header
-          className="sticky top-0 z-20 bg-white flex items-center justify-center px-4"
-          style={{ height: 75, boxShadow: "0px 0px 2px 0px rgba(0,0,0,0.08), 2px 4px 16px 0px rgba(0,0,0,0.08)" }}
-        >
-          <img src={LOGO} alt="Taxfix" className="h-[23px] w-[96px] object-contain" />
-        </header>
-
         {/* Centered content */}
         <div className="flex flex-1 items-center justify-center px-4">
           <div className="flex flex-col gap-[24px] items-center w-[560px] max-w-full">
@@ -431,17 +421,6 @@ export default function ResultsPage() {
 
     {/* ── Screen view ──────────────────────────────────────────────── */}
     <div className="screen-only min-h-screen bg-white flex flex-col">
-      {/* App bar */}
-      <header
-        className="sticky top-0 z-20 bg-white flex items-center justify-center px-4"
-        style={{
-          height: 75,
-          boxShadow: "0px 0px 2px 0px rgba(0,0,0,0.08), 2px 4px 16px 0px rgba(0,0,0,0.08)",
-        }}
-      >
-        <img src={LOGO} alt="Taxfix" className="h-[23px] w-[96px] object-contain" />
-      </header>
-
       {/* Example data banner */}
       {analysis.isExample && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center">

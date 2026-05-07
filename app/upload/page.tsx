@@ -6,7 +6,6 @@ import { track } from "@vercel/analytics";
 import { usePageFlag } from "@/lib/usePageFlag";
 import { pdfStore } from "@/lib/pdfStore";
 
-const LOGO = "/logo.png";
 const DOC_ILLUSTRATION = "/Document.png";
 
 const MAX_MB = 4;
@@ -58,11 +57,6 @@ export default function UploadPage() {
 
   return (
     <main className="bg-white min-h-screen flex flex-col">
-      {/* Logo */}
-      <header className="flex items-center justify-center pt-8 pb-2 shrink-0">
-        <img alt="Taxfix" className="h-[23px] w-[96px] object-contain" src={LOGO} />
-      </header>
-
       {/* Content */}
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-8">
         <div className="flex flex-col gap-[24px] items-center w-full max-w-[600px]">

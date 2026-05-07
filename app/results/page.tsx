@@ -552,12 +552,18 @@ export default function ResultsPage() {
                 >
                   What can be improved
                 </h2>
-                <span
-                  className="flex items-center h-[32px] px-[8px] rounded-[8px] text-[14px] whitespace-nowrap bg-white shrink-0"
-                  style={{ color: "rgba(12,11,10,0.8)" }}
+                <button
+                  onClick={() => window.print()}
+                  className="flex gap-[8px] items-center cursor-pointer hover:opacity-70 transition-opacity shrink-0"
                 >
-                  {analysis.canImprove.length} categories
-                </span>
+                  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+                    <path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M3 15h14" stroke="#154618" strokeWidth="1.75" strokeLinecap="round"/>
+                  </svg>
+                  <span className="text-[16px] text-[#154618] whitespace-nowrap" style={{ fontWeight: 500 }}>
+                    Download summary
+                  </span>
+                </button>
               </div>
               <div className="flex flex-col" style={{ gap: 12 }}>
                 {analysis.canImprove.map((cat, i) => (
@@ -584,17 +590,15 @@ export default function ResultsPage() {
           </svg>
           Back
         </button>
-        <button
-          onClick={() => window.print()}
+        <a
+          href="https://taxfix.com/en-uk/"
+          target="_blank"
+          rel="noopener noreferrer"
           className="bg-[#a0d766] h-[48px] rounded-[10px] px-[20px] flex items-center gap-[8px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
           style={{ fontWeight: 600 }}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 1v9M4.5 6.5 8 10l3.5-3.5" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M2 12h12" stroke="#154618" strokeWidth="1.75" strokeLinecap="round"/>
-          </svg>
-          Download personal checklist
-        </button>
+          Help me fix it
+        </a>
       </div>
     </div>
     </>

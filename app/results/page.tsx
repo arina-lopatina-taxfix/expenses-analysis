@@ -590,15 +590,13 @@ export default function ResultsPage() {
           </svg>
           Back
         </button>
-        <a
-          href="https://taxfix.com/en-uk/"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={() => router.push("/fix")}
           className="bg-[#a0d766] h-[48px] rounded-[10px] px-[20px] flex items-center gap-[8px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
           style={{ fontWeight: 600 }}
         >
           Help me fix it
-        </a>
+        </button>
       </div>
     </div>
     </>

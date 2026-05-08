@@ -266,9 +266,40 @@ function sumDeductions(canImprove: ExpenseCategory[]): number {
   );
 }
 
+// ─── Security ───────────────────────────────────────────────────────────────
+
+const ALLOWED_ORIGINS = [
+  "https://expenses-analysis.vercel.app",
+  "https://taxfix.com",
+  "https://www.taxfix.com",
+  "https://staging.taxfix.tech",
+];
+
+const MAX_PDF_BYTES = 4.5 * 1024 * 1024; // 4.5 MB — Vercel function payload limit
+
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return false;
+  if (process.env.NODE_ENV === "development") return true;
+  return ALLOWED_ORIGINS.some((allowed) => origin.startsWith(allowed));
+}
+
+function isValidProfile(raw: unknown): raw is UserProfile {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return false;
+  const boolKeys = ["married", "dependants", "studentLoan", "homeowner", "renter"];
+  return boolKeys.every((k) => {
+    const v = (raw as Record<string, unknown>)[k];
+    return v === undefined || typeof v === "boolean";
+  });
+}
+
 // ─── Route handler ──────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get("origin") ?? request.headers.get("referer");
+  if (!isAllowedOrigin(origin)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
@@ -290,7 +321,21 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const pdfFile = formData.get("pdf") as File | null;
     const profileRaw = (formData.get("profile") as string | null) ?? "{}";
-    const bodyProfile = JSON.parse(profileRaw) as UserProfile;
+
+    if (pdfFile && pdfFile.size > MAX_PDF_BYTES) {
+      return NextResponse.json({ error: "PDF exceeds maximum allowed size" }, { status: 413 });
+    }
+
+    let bodyProfile: UserProfile;
+    try {
+      bodyProfile = JSON.parse(profileRaw);
+    } catch {
+      return NextResponse.json({ error: "Invalid profile" }, { status: 400 });
+    }
+    if (!isValidProfile(bodyProfile)) {
+      return NextResponse.json({ error: "Invalid profile" }, { status: 400 });
+    }
+
     const pdfBase64 = pdfFile ? Buffer.from(await pdfFile.arrayBuffer()).toString("base64") : null;
 
     profile = bodyProfile || profile;

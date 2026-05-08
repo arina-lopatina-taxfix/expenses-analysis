@@ -235,7 +235,9 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
                 <span className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5] flex-1">
                   {d.description}
                 </span>
-                <AmountChip text={`~${fmt(d.estimatedAmount)}`} />
+                {Number(d.estimatedAmount) > 0 && (
+                  <AmountChip text={`~${fmt(d.estimatedAmount)}`} />
+                )}
               </div>
             ))}
           </div>
@@ -566,7 +568,8 @@ export default function ResultsPage() {
                   What can be improved
                 </h2>
                 <button
-                  onClick={() => window.print()}
+                  type="button"
+                  onClick={() => setTimeout(() => window.print(), 0)}
                   className="flex gap-[8px] items-center cursor-pointer hover:opacity-70 transition-opacity shrink-0"
                 >
                   <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">

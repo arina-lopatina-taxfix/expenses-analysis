@@ -50,7 +50,7 @@ const BREVO_FORM_HTML = `
     <div style="padding: 8px 0;">
       <div class="sib-form-block">
         <div style="display:flex; align-items:flex-start; gap:10px; text-align:left;">
-          <input type="checkbox" id="MARKETING_CONSENT" name="MARKETING_CONSENT" required style="margin-top:3px; flex-shrink:0; width:16px; height:16px; accent-color:#a0d766; cursor:pointer;" />
+          <input type="checkbox" id="MARKETING_CONSENT" name="MARKETING_CONSENT" checked required style="margin-top:3px; flex-shrink:0; width:16px; height:16px; accent-color:#a0d766; cursor:pointer;" />
           <label for="MARKETING_CONSENT" style="font-family:Helvetica, sans-serif; font-size:13px; color:#3c4858; line-height:1.4; cursor:pointer;">
             I agree to receive marketing communications from Taxfix about tax tips, product updates and offers. You can unsubscribe at any time.
           </label>

@@ -40,7 +40,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="bg-white min-h-screen flex flex-col" style={{ marginTop: -80 }}>
+    <main className="bg-white min-h-screen flex flex-col" style={{ marginTop: -40 }}>
       {/* Content */}
       <div className="flex flex-1 flex-col items-center px-4 pt-8 pb-8">
         <div className="flex flex-col gap-[36px] items-center w-full max-w-[560px]">

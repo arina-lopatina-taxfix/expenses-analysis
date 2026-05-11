@@ -115,7 +115,7 @@ export default function SignUpPage() {
   }, [router]);
 
   return (
-    <main className="min-h-screen flex flex-col bg-white" style={{ marginTop: -80 }}>
+    <main className="min-h-screen flex flex-col bg-white" style={{ marginTop: -40 }}>
       <style>{`
         #sib-container * { font-family: 'ABC ROM', sans-serif !important; }
         #sib-container .entry__label { color: #000000 !important; }

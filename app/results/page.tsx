@@ -294,7 +294,7 @@ export default function ResultsPage() {
         : reliefs.slice(0, -1).join(", ") + " or " + reliefs[reliefs.length - 1];
 
     return (
-      <main className="min-h-screen bg-white flex flex-col" style={{ marginTop: -80 }}>
+      <main className="min-h-screen bg-white flex flex-col" style={{ marginTop: -40 }}>
         {/* Centered content */}
         <div className="flex flex-1 items-center justify-center px-4">
           <div className="flex flex-col gap-[24px] items-center w-[560px] max-w-full">
@@ -431,7 +431,7 @@ export default function ResultsPage() {
     </div>
 
     {/* ── Screen view ──────────────────────────────────────────────── */}
-    <div className="screen-only min-h-screen bg-white flex flex-col" style={{ marginTop: -80 }}>
+    <div className="screen-only min-h-screen bg-white flex flex-col" style={{ marginTop: -40 }}>
       {/* Example data banner */}
       {analysis.isExample && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center">

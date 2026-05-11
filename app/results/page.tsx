@@ -294,7 +294,7 @@ export default function ResultsPage() {
         : reliefs.slice(0, -1).join(", ") + " or " + reliefs[reliefs.length - 1];
 
     return (
-      <main className="min-h-screen bg-white flex flex-col">
+      <main className="min-h-screen bg-white flex flex-col" style={{ marginTop: -80 }}>
         {/* Centered content */}
         <div className="flex flex-1 items-center justify-center px-4">
           <div className="flex flex-col gap-[24px] items-center w-[560px] max-w-full">
@@ -431,7 +431,7 @@ export default function ResultsPage() {
     </div>
 
     {/* ── Screen view ──────────────────────────────────────────────── */}
-    <div className="screen-only min-h-screen bg-white flex flex-col">
+    <div className="screen-only min-h-screen bg-white flex flex-col" style={{ marginTop: -80 }}>
       {/* Example data banner */}
       {analysis.isExample && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center">
@@ -447,11 +447,24 @@ export default function ResultsPage() {
       )}
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
+      <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 48 }}>
+        {/* Back nav */}
+        <div className="px-4 pt-5">
+          <button
+            onClick={() => router.push("/upload")}
+            className="flex gap-[8px] items-center text-[rgba(12,11,10,0.8)] text-[16px] hover:opacity-70 transition-opacity"
+            style={{ fontWeight: 500 }}
+          >
+            <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+              <path d="M13 16l-6-6 6-6" stroke="rgba(12,11,10,0.8)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Back
+          </button>
+        </div>
         {/* White header section */}
         <div
           className="flex flex-col items-center text-center px-6"
-          style={{ paddingTop: 45, paddingBottom: 36, gap: 6 }}
+          style={{ paddingTop: 24, paddingBottom: 36, gap: 16 }}
         >
           <p
             className="text-[12px] text-center w-full tracking-wide"
@@ -470,6 +483,13 @@ export default function ResultsPage() {
           >
             Our tax engine analysed your tax return, based on your income bracket and the same type of income
           </p>
+          <button
+            onClick={() => router.push("/fix")}
+            className="bg-[#a0d766] h-[48px] rounded-[10px] px-[28px] flex items-center gap-[8px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
+            style={{ fontWeight: 600 }}
+          >
+            Help me fix it
+          </button>
         </div>
 
         {/* Beige content section */}
@@ -585,30 +605,6 @@ export default function ResultsPage() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Footer */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-20 bg-white flex items-center justify-between px-4"
-        style={{ height: 80, borderTop: "1px solid #f2efed" }}
-      >
-        <button
-          onClick={() => router.push("/upload")}
-          className="flex gap-[8px] items-center text-[#154618] text-[16px] hover:opacity-70 transition-opacity"
-          style={{ fontWeight: 500 }}
-        >
-          <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
-            <path d="M13 16l-6-6 6-6" stroke="#154618" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          Back
-        </button>
-        <button
-          onClick={() => router.push("/fix")}
-          className="bg-[#a0d766] h-[48px] rounded-[10px] px-[20px] flex items-center gap-[8px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
-          style={{ fontWeight: 600 }}
-        >
-          Help me fix it
-        </button>
       </div>
     </div>
     </>

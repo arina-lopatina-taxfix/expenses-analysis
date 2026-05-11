@@ -22,7 +22,7 @@ export default function FixPage() {
   const isCurrentYear = taxYear === "2024/25";
 
   return (
-    <main className="bg-white min-h-screen flex flex-col items-center justify-center px-4">
+    <main className="bg-white min-h-screen flex flex-col items-center justify-center px-4" style={{ marginTop: -80 }}>
       <div className="flex flex-col gap-[24px] items-center w-full max-w-[560px]">
         {/* Illustration */}
         <div className="relative shrink-0" style={{ width: 250, height: 250 }}>

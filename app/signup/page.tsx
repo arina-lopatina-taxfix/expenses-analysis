@@ -7,7 +7,7 @@ import { track } from "@vercel/analytics";
 import { usePageFlag } from "@/lib/usePageFlag";
 
 const BREVO_FORM_HTML = `
-<div id="sib-container" class="sib-container--large sib-container--vertical" style="max-width:540px; text-align:center; background-color:rgba(255,255,255,1); border-width:0px; border-style:solid; border-color:#C0CCD9; border-radius:11px; direction:ltr">
+<div id="sib-container" class="sib-container--large sib-container--vertical" style="max-width:540px; text-align:center; background-color:#f9f7f5; border-width:0px; border-style:solid; border-color:#C0CCD9; border-radius:11px; direction:ltr">
   <form id="sib-form" method="POST" action="https://f261eed8.sibforms.com/serve/MUIFAOemvK9thqVxmi_0nOw0h_5iqdlmUB9nsoUk4fCMy5D3pfi-E21RovraavOT_XasAksNSWXqJjgiol5S2aC2Y2tx95jd2ZcWY1nYu7RaVQ9G67bjkJNwtbXkIoLbWLpLba-xwY4FYSWQfGwFqrh9oevNdBU1Fpmxodgb_15a3MeJWxAbEXKXsHamwo8FOboEoR2ebjI_o3b7" data-type="subscription">
     <div style="padding: 8px 0 0;">
       <div class="sib-form-block" style="font-size:27px; text-align:center; font-weight:700; font-family:Helvetica, sans-serif; color:#000000; background-color:transparent;">
@@ -115,7 +115,7 @@ export default function SignUpPage() {
   }, [router]);
 
   return (
-    <main className="min-h-screen flex flex-col" style={{ background: "#f9f7f5", marginTop: -80 }}>
+    <main className="min-h-screen flex flex-col bg-white" style={{ marginTop: -80 }}>
       <style>{`
         #sib-container * { font-family: 'ABC ROM', sans-serif !important; }
         #sib-container .entry__label { color: #000000 !important; }

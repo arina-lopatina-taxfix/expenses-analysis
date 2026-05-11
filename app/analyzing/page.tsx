@@ -84,7 +84,7 @@ export default function AnalyzingPage() {
   return (
     <main className="bg-white min-h-screen flex flex-col" style={{ marginTop: -80 }}>
       {/* Content */}
-      <div className="flex flex-1 flex-col items-center justify-center px-4 py-8">
+      <div className="flex flex-1 flex-col items-center px-4 pt-8 pb-8">
         <div className="flex flex-col gap-[24px] items-center">
           <div className="h-[255px] relative shrink-0 w-[256px]">
             <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={ILLUSTRATION} />

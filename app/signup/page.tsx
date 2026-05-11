@@ -136,7 +136,7 @@ export default function SignUpPage() {
           height: 20px !important;
         }
       `}</style>
-      <div className="flex flex-1 items-center px-4 pt-[50px] pb-8">
+      <div className="flex flex-1 items-center justify-center px-4">
         <div
           dangerouslySetInnerHTML={{ __html: BREVO_FORM_HTML }}
           className="w-full"

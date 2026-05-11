@@ -10,14 +10,20 @@ const ILLUSTRATION = "/prefill-optin.png";
 
 const STAGES = [
   "Reading your return…",
+  "Checking income type…",
   "Identifying missed expenses…",
+  "Comparing with similar profiles…",
   "Calculating potential refund…",
+  "Preparing your summary…",
 ];
+
+const ANALYSIS_DURATION_MS = 25000;
 
 export default function AnalyzingPage() {
   const router = useRouter();
   const pageEnabled = usePageFlag("analyzing-page");
   const [activeStage, setActiveStage] = useState(0);
+  const [progress, setProgress] = useState(0);
   const hasFetched = useRef(false);
 
   useEffect(() => { track("page_viewed", { page: "analyzing" }); }, []);
@@ -27,8 +33,17 @@ export default function AnalyzingPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveStage((s) => (s + 1) % STAGES.length);
-    }, 3000);
+    }, Math.floor(ANALYSIS_DURATION_MS / STAGES.length));
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const start = Date.now();
+    const tick = setInterval(() => {
+      const elapsed = Date.now() - start;
+      setProgress(Math.min(95, (elapsed / ANALYSIS_DURATION_MS) * 100));
+    }, 100);
+    return () => clearInterval(tick);
   }, []);
 
   useEffect(() => {
@@ -99,6 +114,13 @@ export default function AnalyzingPage() {
                 </p>
               );
             })}
+          </div>
+          {/* Progress bar */}
+          <div className="w-full max-w-[300px] h-[4px] rounded-full" style={{ background: "rgba(12,11,10,0.08)" }}>
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${progress}%`, background: "#a0d766", transition: "width 0.1s linear" }}
+            />
           </div>
         </div>
       </div>

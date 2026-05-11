@@ -145,23 +145,19 @@ function AlreadyClaimingCard({ category }: { category: ExpenseCategory }) {
           <AmountChip text={fmt(category.claimedAmount)} />
         )}
       </div>
-      {/* RIGHT: advice box */}
-      {category.adviceText && (
-        <div
-          className="bg-[#f9f7f5] flex flex-[1_0_0] flex-col min-w-0 p-[14px] rounded-[12px] relative"
-          style={{ gap: 2 }}
-        >
-          <div className="flex gap-[6px] items-start">
-            <FaIcon glyph={''} />
-            <p
-              className="text-[14px] text-[#0c0b0a] leading-[20px]"
-              style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
-            >
-              Advice
-            </p>
+      {/* RIGHT: green tick + claimed description */}
+      {category.claimedDescription && (
+        <div className="flex flex-[1_0_0] items-start gap-[10px] min-w-0">
+          <div
+            className="shrink-0 flex items-center justify-center rounded-full"
+            style={{ width: 22, height: 22, background: "#e8f5d6", marginTop: 1 }}
+          >
+            <svg viewBox="0 0 12 12" fill="none" width={12} height={12}>
+              <path d="M2 6l3 3 5-5" stroke="#36893b" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
           <p className="text-[14px] text-[rgba(12,11,10,0.65)] leading-[1.5]">
-            {category.adviceText}
+            {category.claimedDescription}
           </p>
         </div>
       )}
@@ -226,7 +222,7 @@ function CanImproveCard({ category }: { category: ExpenseCategory }) {
               className="text-[14px] text-[#0c0b0a] leading-[20px]"
               style={{ fontWeight: 700, letterSpacing: "-0.14px" }}
             >
-              What you can deduct?
+              What do others typically deduct?
             </p>
           </div>
           <div className="flex flex-col" style={{ gap: 8 }}>
@@ -472,7 +468,7 @@ export default function ResultsPage() {
             className="text-[14px] text-[rgba(12,11,10,0.6)] leading-[1.3] text-center"
             style={{ maxWidth: 600 }}
           >
-            {`We compared your ${analysis.taxYear} tax return with others from people in a similar income bracket and the same type of income. Here's what's on your return — and what you might be missing. All numbers shown are illustrative only.`}
+            Our tax engine analysed your tax return, based on your income bracket and the same type of income
           </p>
         </div>
 

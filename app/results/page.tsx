@@ -324,7 +324,7 @@ export default function ResultsPage() {
             {/* CTAs */}
             <div className="flex flex-col gap-[8px] items-center w-full max-w-[300px]">
               <a
-                href="https://taxfix.com/en-uk/"
+                href="https://staging.taxfix.tech/en-uk/assessment/signup"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"

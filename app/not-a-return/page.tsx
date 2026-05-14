@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
 
-const ILLUSTRATION = "/mailbox.png";
+const ILLUSTRATION = "/XL.png";
 
 export default function NotATaxReturnPage() {
   const router = useRouter();

@@ -11,7 +11,15 @@ function PageviewTracker() {
   const isFirst = useRef(true);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Disable browser scroll restoration so back/forward navigation
+    // doesn't override our explicit scroll-to-top.
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
 
     // Skip the very first render — the loaded callback handles that pageview
     // to guarantee PostHog is initialised before it fires.

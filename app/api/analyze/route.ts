@@ -4,10 +4,25 @@ import type { TaxAnalysis, ExpenseCategory, UserProfile } from "@/lib/types";
 
 export const maxDuration = 120;
 
-// ─── Prompt 1: read the PDF, extract already-claimed expenses ──────────────
+// ─── Single combined prompt ─────────────────────────────────────────────────
 
-const PROMPT_1 = `You are a UK tax expert. Read the uploaded SA100 Self Assessment PDF and extract the data.
+const HMRC_RATES = `
+HMRC ALLOWABLE EXPENSES (UK Self Assessment):
+- Mileage: 45p/mile (first 10k), 25p/mile after
+- Home office flat rate: £6/week (£312/yr). Actual cost method often higher for homeowners.
+- Mortgage interest: 20% basic-rate tax credit for landlords (not deducted from income)
+- Property allowance: first £1,000 rental income tax-free
+- Marriage Allowance: £1,260 transferable if one spouse earns under Personal Allowance (£12,570)
+- Allowable: office costs, equipment, software, business travel, protective clothing, staff costs,
+  marketing, professional fees, bank charges, skills training (maintain current skills only)
+- Property: letting agent fees, insurance, maintenance (not improvements), legal fees
+`;
 
+const COMBINED_PROMPT = `You are a UK tax expert. Read the uploaded SA100 Self Assessment PDF (if provided) and produce a complete tax analysis in one JSON response.
+
+────────────────────────────────────────
+PART 1 — EXTRACT FROM PDF
+────────────────────────────────────────
 Read every page carefully — SA100, SA102, SA103S, SA103F, SA105.
 
 ELIGIBILITY — set isEligible based on which supplementary pages are present:
@@ -19,30 +34,12 @@ incomeType: one short label describing the PRIMARY income source:
 - SA103S or SA103F present → "Self-employed"
 - SA105 present (and no SA103) → "Property income"
 - SA102 present (and no SA103/SA105) → "Employment"
-- Mixed → list the dominant one, e.g. "Self-employed"
+- Mixed → list the dominant one
 - Unknown → "Unknown"
 
-SA103S boxes:
-- Box 17: Total allowable expenses
-- Box 18: Cost of goods/materials
-- Box 19: Car, van and travel
-- Box 20: Other allowable expenses (phone, office, advertising, etc.)
-
-SA103F boxes:
-- Box 17: Goods bought for resale
-- Box 19: Wages and staff costs
-- Box 20: Car, van and travel
-- Box 21: Rent, rates, power, insurance
-- Box 22: Repairs and renewals
-- Box 23: Phone, stationery, office costs
-- Box 24: Advertising and entertainment
-- Box 25: Interest on loans
-- Box 26: Bank and financial charges
-- Box 28: Accountancy and professional fees
-- Box 30: Other business expenses
-
-SA105 boxes:
-- Boxes 5–10: Letting agent fees, legal fees, insurance, maintenance, other costs
+SA103S boxes: Box 17 (total allowable expenses), Box 18 (goods/materials), Box 19 (car/travel), Box 20 (other allowable expenses).
+SA103F boxes: Box 17–30 covering wages, travel, rent, repairs, phone, advertising, interest, bank charges, accountancy, other.
+SA105 boxes: Boxes 5–10 covering letting agent fees, legal fees, insurance, maintenance, other costs.
 
 For each box with a NON-ZERO value create one alreadyClaiming entry:
 - emoji: relevant emoji
@@ -55,6 +52,49 @@ If no expense boxes are filled, or no PDF provided, generate 2-3 realistic examp
 
 businessType: copy verbatim from the business description field on SA103S/SA103F. If not present, infer from the expense pattern. Be precise — "iOS mobile developer" not "consultant".
 
+────────────────────────────────────────
+PART 2 — GENERATE MISSED-DEDUCTION SUGGESTIONS
+────────────────────────────────────────
+Use the businessType, incomeType, and alreadyClaiming from Part 1 to generate tailored canImprove suggestions.
+
+${HMRC_RATES}
+
+CATEGORY LIST — start with these standard categories. Select ones relevant to this profession:
+1. 🏠 Working from home
+2. 📱 Office & Phone
+3. 💻 Tech & Equipment
+4. 🚗 Travel
+5. 🔧 Materials & Stock
+6. 👔 Clothing
+7. 📋 Professional Services
+8. 🛡️ Insurance
+9. 📚 Training
+10. 👥 Staff (if you have any)
+11. 🎫 Subscriptions
+
+PROFILE-BASED CATEGORIES (apply based on user profile in the message):
+- Married → add: { "emoji": "💍", "name": "Marriage Allowance", "description": "Transfer unused Personal Allowance to your spouse and cut your combined tax bill.", "adviceText": "If your spouse earns under £12,570 this year, claim now — and backdate up to 4 tax years for up to £1,260 extra.", "deductions": [{ "description": "Transfer £1,260 Personal Allowance to higher-earning spouse", "estimatedAmount": 252 }, { "description": "Backdate claim up to 4 tax years", "estimatedAmount": 1008 }] }
+- Has dependants → add: { "emoji": "👶", "name": "Child Benefits & Tax-Free Childcare", "description": "Government schemes that top up your childcare costs and reduce your tax bill.", "adviceText": "Earn over £60k? Check if the High Income Child Benefit Charge applies — and consider Tax-Free Childcare for up to £2,000/yr per child.", "deductions": [{ "description": "Tax-Free Childcare government top-up (20% on up to £8k/yr per child)", "estimatedAmount": 2000 }, { "description": "Check High Income Child Benefit Charge threshold (£60k)", "estimatedAmount": 0 }] }
+- Has student loan → add: { "emoji": "🎓", "name": "Student Loan Planning", "description": "Understanding your repayment plan can prevent unnecessary overpayments.", "adviceText": "Check your Plan type — overpaying voluntarily only makes sense if your interest rate is higher than savings rates.", "deductions": [{ "description": "Review Plan 1/2/4 repayment threshold vs your income", "estimatedAmount": 0 }, { "description": "Voluntary overpayments only if income is stable and interest rate justifies it", "estimatedAmount": 0 }] }
+
+WORKING FROM HOME — tailor deductions based on housing status from user profile:
+- Homeowner: deductions MUST be ["Proportion of mortgage interest (home-office rooms ÷ total rooms)", "Council tax proportion", "Heating & electricity proportion", "Broadband — business-use share"]
+- Renter: deductions MUST be ["Proportion of rent (business room usage % of floor area)", "Heating & electricity proportion", "Broadband — business-use share", "Contents insurance — business-use proportion"]
+- Neither: deductions should be ["HMRC flat rate £6/wk (£312/yr)", "Broadband — business-use share", "Dedicated office furniture"]
+
+RULES:
+- Generate 2-4 deduction line items SPECIFIC to this person's profession — name real tools, platforms, registration bodies, courses, and services they would actually use.
+- For each category write "description": one sentence FOR THIS SPECIFIC PROFESSION. Max 100 chars.
+- For each category write "adviceText": one actionable tip for this specific person. Max 120 chars.
+- Do NOT use generic labels — be specific (e.g. "Adobe Creative Cloud (£600/yr)", "Gas Safe Register annual fee").
+- DEDUPLICATION IS CRITICAL: do NOT include any canImprove category that covers substantially the same area as something in alreadyClaiming. Examples: "Phone & office costs" = "📱 Office & Phone" → SKIP. "Vehicle expenses" = "🚗 Travel" → SKIP.
+- Always return at least 4 canImprove categories.
+- Do NOT include "Materials & Stock" for knowledge workers (developers, designers, writers, consultants, etc.).
+- Do NOT include "Staff" if there is no indication the person employs others.
+
+────────────────────────────────────────
+RETURN FORMAT
+────────────────────────────────────────
 Return ONLY valid JSON, no markdown, no code fences:
 {
   "taxYear": "2024/25",
@@ -70,76 +110,7 @@ Return ONLY valid JSON, no markdown, no code fences:
       "claimedDescription": "Business mileage at 45p/mile (SA103S box 19).",
       "adviceText": "Actual costs may exceed flat rate for high-mileage use."
     }
-  ]
-}`;
-
-// ─── Prompt 2: generate profession-specific canImprove suggestions ──────────
-
-const HMRC_RATES = `
-HMRC ALLOWABLE EXPENSES (UK Self Assessment):
-- Mileage: 45p/mile (first 10k), 25p/mile after
-- Home office flat rate: £6/week (£312/yr). Actual cost method often higher for homeowners.
-- Mortgage interest: 20% basic-rate tax credit for landlords (not deducted from income)
-- Property allowance: first £1,000 rental income tax-free
-- Marriage Allowance: £1,260 transferable if one spouse earns under Personal Allowance (£12,570)
-- Allowable: office costs, equipment, software, business travel, protective clothing, staff costs,
-  marketing, professional fees, bank charges, skills training (maintain current skills only)
-- Property: letting agent fees, insurance, maintenance (not improvements), legal fees
-`;
-
-const PROMPT_2 = `You are a UK tax expert specialising in HMRC expense optimisation.
-
-${HMRC_RATES}
-
-CATEGORY LIST — start with these standard categories (use exact emoji and name). Select the ones relevant to this profession and skip any that clearly don't apply. You MAY also add extra profession-specific categories beyond this list if there are significant deductions not covered — but do NOT duplicate or rename anything already in the list or already claimed.
-
-1. 🏠 Working from home
-2. 📱 Office & Phone
-3. 💻 Tech & Equipment
-4. 🚗 Travel
-5. 🔧 Materials & Stock
-6. 👔 Clothing
-7. 📋 Professional Services
-8. 🛡️ Insurance
-9. 📚 Training
-10. 👥 Staff (if you have any)
-11. 🎫 Subscriptions
-
-PROFILE-BASED CATEGORIES — add these only if the user profile flag is YES:
-- Married → add: { "emoji": "💍", "name": "Marriage Allowance", "description": "Transfer unused Personal Allowance to your spouse and cut your combined tax bill.", "adviceText": "If your spouse earns under £12,570 this year, claim now — and backdate up to 4 tax years for up to £1,260 extra.", "deductions": [{ "description": "Transfer £1,260 Personal Allowance to higher-earning spouse", "estimatedAmount": 252 }, { "description": "Backdate claim up to 4 tax years", "estimatedAmount": 1008 }] }
-- Has dependants → add: { "emoji": "👶", "name": "Child Benefits & Tax-Free Childcare", "description": "Government schemes that top up your childcare costs and reduce your tax bill.", "adviceText": "Earn over £60k? Check if the High Income Child Benefit Charge applies — and consider Tax-Free Childcare for up to £2,000/yr per child.", "deductions": [{ "description": "Tax-Free Childcare government top-up (20% on up to £8k/yr per child)", "estimatedAmount": 2000 }, { "description": "Check High Income Child Benefit Charge threshold (£60k)", "estimatedAmount": 0 }] }
-- Has student loan → add: { "emoji": "🎓", "name": "Student Loan Planning", "description": "Understanding your repayment plan can prevent unnecessary overpayments.", "adviceText": "Check your Plan type — overpaying voluntarily only makes sense if your interest rate is higher than savings rates.", "deductions": [{ "description": "Review Plan 1/2/4 repayment threshold vs your income", "estimatedAmount": 0 }, { "description": "Voluntary overpayments only if income is stable and interest rate justifies it", "estimatedAmount": 0 }] }
-
-WORKING FROM HOME — tailor the deductions based on housing status:
-- Homeowner (owns property = YES): deductions MUST be ["Proportion of mortgage interest (home-office rooms ÷ total rooms)", "Council tax proportion (business rooms ÷ total rooms)", "Heating & electricity proportion", "Broadband — business-use share"]
-- Renter (pays rent = YES): deductions MUST be ["Proportion of rent (business room usage % of floor area)", "Heating & electricity proportion", "Broadband — business-use share", "Contents insurance — business-use proportion"]
-- Neither: deductions should be ["HMRC flat rate £6/wk (£312/yr)", "Broadband — business-use share", "Dedicated office furniture"]
-
-RULES:
-- For each selected category generate 2-4 deduction line items SPECIFIC to this person's profession — name real tools, platforms, registration bodies, courses, and services they would actually use.
-- For each category write a "description": one sentence explaining what this category covers FOR THIS SPECIFIC PROFESSION (not a generic definition). Max 100 chars.
-- For each category write an "adviceText": one actionable tip to maximise this deduction for this specific person. Max 120 chars.
-- Do NOT use generic labels like "software subscriptions" or "professional fees" — be specific (e.g. "Adobe Creative Cloud (£600/yr)", "Gas Safe Register annual fee", "GMC annual retention fee (£446)").
-- DEDUPLICATION IS CRITICAL. Before adding any canImprove category, check whether it covers substantially the same expense area as something already claimed. Use SEMANTIC matching — ignore exact wording differences. Examples of what counts as the same:
-  • "Phone & office costs" = "Office & Phone" = "📱 Office & Phone" → SKIP canImprove
-  • "Vehicle expenses" = "Car and travel" = "🚗 Travel" → SKIP canImprove
-  • "Use of home" = "Home office" = "🏠 Working from home" → SKIP canImprove
-  If there is meaningful overlap, do NOT include that category in canImprove — even if the names are not identical.
-- IMPORTANT: Always return at least 4 canImprove categories. Never return an empty list — if in doubt, include the category with relevant deductions the person might have missed.
-- Do NOT include "Materials & Stock" for knowledge workers (developers, designers, writers, consultants, therapists, accountants, etc.).
-- Do NOT include "Staff" if there is no indication the person employs others.
-
-SPECIFICITY REFERENCE:
-- iOS/Android developer → Tech: "Apple Developer Program (£79/yr)", "Xcode / simulator hardware"; Training: "WWDC tickets or recordings", "Udemy iOS courses"; Subscriptions: "GitHub Pro (£48/yr)", "Stack Overflow Teams"
-- Plumber/gas engineer → Materials: "Flux, solder, push-fit fittings", "Pipe insulation lagging"; Training: "Gas Safe Register annual levy", "18th Edition update course"; Insurance: "Public liability (£1M minimum)"
-- Therapist/counsellor → Professional Services: "BACP annual membership (£118)", "Clinical supervision sessions (£50–£80/session)"; Insurance: "Professional indemnity (£1M+)"; Training: "CPD accredited workshops"
-- Graphic/UX designer → Tech: "Adobe Creative Cloud (£660/yr)", "Figma Professional (£144/yr)"; Subscriptions: "Dribbble Pro portfolio", "Stock imagery licence (Shutterstock/Getty)"
-- GP/private doctor → Subscriptions: "GMC annual retention fee (£446)", "BMA membership"; Insurance: "Medical indemnity (MDU/MPS ~£1,500+/yr)"; Training: "CPD accredited courses"
-- Freelance writer/journalist → Subscriptions: "NUJ membership (press card)", "Specialist research databases"; Tech: "Transcription software (Otter.ai/Rev)", "Noise-cancelling headset"
-- Accountant/bookkeeper → Subscriptions: "ICAEW/ACCA annual subscription", "Practice management software (Xero/QuickBooks)"; Training: "CPD hours (mandatory 40/yr)"
-
-Return ONLY valid JSON, no markdown, no code fences:
-{
+  ],
   "canImprove": [
     {
       "emoji": "💻",
@@ -275,7 +246,7 @@ const ALLOWED_ORIGINS = [
   "https://staging.taxfix.tech",
 ];
 
-const MAX_PDF_BYTES = 4.5 * 1024 * 1024; // 4.5 MB — Vercel function payload limit
+const MAX_PDF_BYTES = 4.5 * 1024 * 1024;
 
 function isAllowedOrigin(origin: string | null): boolean {
   if (!origin) return false;
@@ -337,115 +308,70 @@ export async function POST(request: NextRequest) {
     }
 
     const pdfBase64 = pdfFile ? Buffer.from(await pdfFile.arrayBuffer()).toString("base64") : null;
-
     profile = bodyProfile || profile;
 
     console.log("Starting analysis. PDF provided:", !!pdfBase64, "Profile:", JSON.stringify(profile));
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // ── Call 1: extract already-claimed expenses from PDF ───────────────────
-    console.log("Call 1: extracting from PDF…");
+    // ── Single call: extract + suggest in one pass ──────────────────────────
+    console.log("Single call: extracting and generating suggestions…");
 
-    const pdfParts = [
-      ...(pdfBase64
-        ? [createPartFromBase64(pdfBase64, "application/pdf")]
-        : [createPartFromText("No PDF provided. Generate realistic example data for a freelance consultant.")]),
-      createPartFromText("Extract all claimed expenses and the business type from this Self Assessment return."),
-    ];
-
-    const call1 = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [{ role: "user", parts: pdfParts }],
-      config: {
-        systemInstruction: PROMPT_1,
-        responseMimeType: "application/json",
-        temperature: 0.1,
-        maxOutputTokens: 8192,
-      },
-    });
-
-    const raw1 = (call1.text ?? "").trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
-    if (!raw1) throw new Error("Call 1: Gemini returned empty response");
-
-    const step1 = JSON.parse(raw1) as {
-      taxYear: string;
-      incomeType: string;
-      isEligible: boolean;
-      businessType?: string;
-      turnover?: number;
-      alreadyClaiming: ExpenseCategory[];
-    };
-    console.log("Call 1 done. businessType:", step1.businessType, "alreadyClaiming:", step1.alreadyClaiming?.length);
-
-    // ── Call 2: generate profession-specific canImprove suggestions ──────────
-    console.log("Call 2: generating tailored suggestions for:", step1.businessType);
-
-    const alreadyClaimingDetail = (step1.alreadyClaiming || [])
-      .map((c) => `  - ${c.name} (£${c.claimedAmount ?? 0}): ${c.claimedDescription ?? ""}`)
-      .join("\n") || "  Nothing claimed yet";
-
-    const alreadyClaimedNames = (step1.alreadyClaiming || []).map((c) => c.name).join(", ");
-
-    const suggestionPrompt = `Business type: ${step1.businessType || "self-employed professional"}
-Income type: ${step1.incomeType || "Self-employed"}
-Annual turnover: ${step1.turnover ? `£${step1.turnover}` : "unknown"}
-
-Already claimed expenses (detail):
-${alreadyClaimingDetail}
-
-ALREADY CLAIMED CATEGORIES — do NOT include any canImprove category that covers substantially the same area as these:
-${alreadyClaimedNames || "none"}
-
-User profile (from their self-reported answers):
+    const profileText = `User profile:
 - Married / civil partner: ${profile.married ? "YES" : "no"}
 - Has dependants: ${profile.dependants ? "YES" : "no"}
 - Homeowner (owns property): ${profile.homeowner ? "YES" : "no"}
 - Renter (pays rent): ${profile.renter ? "YES" : "no"}
 - Has student loan: ${profile.studentLoan ? "YES" : "no"}
 
-Generate specific missed deduction categories for this person. Apply all relevant user profile rules from your instructions (home office for homeowners/renters, Marriage Allowance for married users, etc.).`;
+${pdfBase64 ? "Analyse this Self Assessment return and generate the complete tax analysis." : "No PDF provided. Generate realistic example data for a freelance consultant, then generate tailored suggestions."}`;
 
-    const call2 = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [{ role: "user", parts: [createPartFromText(suggestionPrompt)] }],
+    const parts = [
+      ...(pdfBase64
+        ? [createPartFromBase64(pdfBase64, "application/pdf")]
+        : []),
+      createPartFromText(profileText),
+    ];
+
+    const result = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: [{ role: "user", parts }],
       config: {
-        systemInstruction: PROMPT_2,
+        systemInstruction: COMBINED_PROMPT,
         responseMimeType: "application/json",
-        temperature: 0.3,
-        maxOutputTokens: 8192,
+        temperature: 0.2,
+        maxOutputTokens: 4096,
       },
     });
 
-    const raw2 = (call2.text ?? "").trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
-    if (!raw2) throw new Error("Call 2: Gemini returned empty response");
+    const raw = (result.text ?? "").trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+    if (!raw) throw new Error("Gemini returned empty response");
 
-    const step2 = JSON.parse(raw2) as { canImprove: ExpenseCategory[] };
-    console.log("Call 2 done. canImprove categories:", step2.canImprove?.length);
+    const parsed = JSON.parse(raw) as TaxAnalysis;
+    console.log("Call done. businessType:", parsed.businessType, "alreadyClaiming:", parsed.alreadyClaiming?.length, "canImprove:", parsed.canImprove?.length);
 
-    const rawCanImprove = step2.canImprove && step2.canImprove.length > 0
-      ? step2.canImprove
-      : getMockData(profile).canImprove;
-
-    // Remove any canImprove categories that substantially overlap with already-claimed ones
-    const claimedTokens = (step1.alreadyClaiming || []).flatMap((c) =>
+    // Deduplication: remove canImprove categories that overlap with alreadyClaiming
+    const claimedTokens = (parsed.alreadyClaiming || []).flatMap((c) =>
       c.name.toLowerCase().replace(/[^a-z0-9 ]/g, "").split(/\s+/).filter((w) => w.length > 3)
     );
+    const rawCanImprove = parsed.canImprove && parsed.canImprove.length > 0
+      ? parsed.canImprove
+      : getMockData(profile).canImprove;
     const deduped = rawCanImprove.filter((cat) => {
       const catTokens = cat.name.toLowerCase().replace(/[^a-z0-9 ]/g, "").split(/\s+/).filter((w) => w.length > 3);
       const overlap = catTokens.some((t) => claimedTokens.includes(t));
-      if (overlap) console.log(`Dedup filter removed: ${cat.name} (overlaps with already claimed)`);
+      if (overlap) console.log(`Dedup filter removed: ${cat.name}`);
       return !overlap;
     });
     const canImprove = fixCanImprove(deduped.length >= 2 ? deduped : rawCanImprove);
 
     const analysis: TaxAnalysis = {
-      taxYear: step1.taxYear,
-      incomeType: step1.incomeType,
-      isEligible: step1.isEligible ?? true,
-      businessType: step1.businessType,
-      turnover: step1.turnover,
-      alreadyClaiming: step1.alreadyClaiming || [],
+      taxYear: parsed.taxYear,
+      incomeType: parsed.incomeType,
+      isEligible: parsed.isEligible ?? true,
+      businessType: parsed.businessType,
+      turnover: parsed.turnover,
+      alreadyClaiming: parsed.alreadyClaiming || [],
       canImprove,
       totalMissedDeductions: sumDeductions(canImprove),
     };

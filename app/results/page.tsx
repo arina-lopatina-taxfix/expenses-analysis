@@ -447,7 +447,7 @@ export default function ResultsPage() {
       )}
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 48 }}>
+      <div className="flex-1" style={{ paddingBottom: 48 }}>
         {/* Back nav */}
         <div className="px-4 pt-5">
           <button

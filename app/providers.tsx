@@ -11,6 +11,8 @@ function PageviewTracker() {
   const isFirst = useRef(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+
     // Skip the very first render — the loaded callback handles that pageview
     // to guarantee PostHog is initialised before it fires.
     if (isFirst.current) {

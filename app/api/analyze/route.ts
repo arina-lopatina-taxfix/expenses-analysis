@@ -367,7 +367,11 @@ ${pdfBase64 ? "Analyse this Self Assessment return and generate the complete tax
     if (!raw) throw new Error("Gemini returned empty response");
 
     const parsed = JSON.parse(raw) as TaxAnalysis;
-    console.log("Call done. businessType:", parsed.businessType, "alreadyClaiming:", parsed.alreadyClaiming?.length, "canImprove:", parsed.canImprove?.length);
+    console.log("Call done. isNotTaxReturn:", parsed.isNotTaxReturn, "businessType:", parsed.businessType, "alreadyClaiming:", parsed.alreadyClaiming?.length, "canImprove:", parsed.canImprove?.length);
+
+    if (parsed.isNotTaxReturn) {
+      return NextResponse.json({ isNotTaxReturn: true, isEligible: false, taxYear: null, incomeType: "Unknown", alreadyClaiming: [], canImprove: [], totalMissedDeductions: 0 });
+    }
 
     // Deduplication: remove canImprove categories that overlap with alreadyClaiming
     const claimedTokens = (parsed.alreadyClaiming || []).flatMap((c) =>
@@ -385,6 +389,7 @@ ${pdfBase64 ? "Analyse this Self Assessment return and generate the complete tax
     const canImprove = fixCanImprove(deduped.length >= 2 ? deduped : rawCanImprove);
 
     const analysis: TaxAnalysis = {
+      isNotTaxReturn: false,
       taxYear: parsed.taxYear,
       incomeType: parsed.incomeType,
       isEligible: parsed.isEligible ?? true,

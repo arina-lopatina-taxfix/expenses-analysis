@@ -5,24 +5,26 @@ import { PostHogProvider as PHProvider } from "posthog-js/react";
 import { useEffect, useLayoutEffect, useRef, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
+// Separate component with no Suspense boundary so useLayoutEffect fires
+// immediately on every pathname change — before the browser paints.
+function ScrollReset() {
+  const pathname = usePathname();
+
+  useLayoutEffect(() => {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
+// Needs Suspense because of useSearchParams — kept separate from ScrollReset.
 function PageviewTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isFirst = useRef(true);
-
-  useEffect(() => {
-    // Disable browser scroll restoration so back/forward navigation
-    // doesn't override our explicit scroll-to-top.
-    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-  }, []);
-
-  // useLayoutEffect runs before the browser paints — this prevents the page
-  // from being briefly visible at the previous scroll position.
-  useLayoutEffect(() => {
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    window.scrollTo(0, 0);
-  }, [pathname, searchParams]);
 
   useEffect(() => {
     // Skip the very first render — the loaded callback handles that pageview
@@ -63,6 +65,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PHProvider client={posthog}>
+      <ScrollReset />
       <Suspense fallback={null}>
         <PageviewTracker />
       </Suspense>

@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Script from "next/script";
 import { track } from "@vercel/analytics";
 import { usePageFlag } from "@/lib/usePageFlag";
 
@@ -143,10 +142,6 @@ export default function SignUpPage() {
           style={{ maxWidth: 540 }}
         />
       </div>
-      <Script
-        src="https://sibforms.com/forms/end-form/build/main.js"
-        strategy="lazyOnload"
-      />
     </main>
   );
 }

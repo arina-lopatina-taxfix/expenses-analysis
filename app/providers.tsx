@@ -12,9 +12,21 @@ function ScrollReset() {
 
   useLayoutEffect(() => {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    window.scrollTo(0, 0);
+
+    const reset = () => {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+      window.scrollTo(0, 0);
+    };
+
+    // Immediate reset before paint
+    reset();
+
+    // Second reset after all effects + any framework scroll handling settle
+    const raf = requestAnimationFrame(reset);
+
+    return () => cancelAnimationFrame(raf);
   }, [pathname]);
 
   return null;

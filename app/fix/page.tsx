@@ -60,8 +60,6 @@ export default function FixPage() {
               </a>
               <a
                 href="https://staging.taxfix.tech/en-uk/assessment/signup"
-                target="_blank"
-                rel="noopener noreferrer"
                 className="flex items-center justify-center h-[48px] w-full text-[16px] text-[#154618] hover:opacity-70 transition-opacity"
                 style={{ fontWeight: 500 }}
               >
@@ -71,8 +69,6 @@ export default function FixPage() {
           ) : (
             <a
               href="https://staging.taxfix.tech/en-uk/assessment/signup"
-              target="_blank"
-              rel="noopener noreferrer"
               className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
               style={{ background: "#a0d766", fontWeight: 500 }}
             >

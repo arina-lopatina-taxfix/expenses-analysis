@@ -482,7 +482,7 @@ export default function ResultsPage() {
             Our tax engine analysed your tax return, based on your income bracket and the same type of income
           </p>
           <button
-            onClick={() => router.push("/fix")}
+            onClick={() => router.push(analysis.taxYear === "2024/25" ? "/fix" : "/fix-file")}
             className="bg-[#a0d766] h-[48px] rounded-[10px] px-[28px] flex items-center gap-[8px] text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
             style={{ fontWeight: 600 }}
           >

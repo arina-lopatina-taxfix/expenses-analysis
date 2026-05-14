@@ -25,6 +25,14 @@ PART 1 — EXTRACT FROM PDF
 ────────────────────────────────────────
 Read every page carefully — SA100, SA102, SA103S, SA103F, SA105.
 
+TAX YEAR — extract from the document header/title page:
+- Look for phrases like "Tax year 6 April YYYY to 5 April YYYY", "for the year ended 5 April YYYY", or "Tax year ended 5 April YYYY"
+- Convert to format "YYYY/YY": "ended 5 April 2025" → "2024/25", "ended 5 April 2024" → "2023/24", "ended 5 April 2023" → "2022/23"
+- The formula: if the year shown after "5 April" is Y, taxYear = "(Y-1)/YY" where YY is the last two digits of Y
+- Check the cover page, SA100 page 1 header, and all supplementary page headers
+- If multiple years appear, use the most recent one
+- ONLY fall back to "2024/25" if the tax year truly cannot be determined from any page of the document
+
 ELIGIBILITY — set isEligible based on which supplementary pages are present:
 - isEligible = true  if SA103S or SA103F (self-employment) OR SA105 (UK property/landlord) is included
 - isEligible = false if only SA102 (employment/PAYE) or no expense-bearing pages are present

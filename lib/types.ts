@@ -17,6 +17,7 @@ export interface TaxAnalysis {
   taxYear: string;
   incomeType: string;
   isEligible: boolean;
+  isNotTaxReturn?: boolean;
   businessType?: string;
   turnover?: number;
   totalMissedDeductions: number;

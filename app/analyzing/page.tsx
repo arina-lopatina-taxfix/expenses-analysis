@@ -66,7 +66,11 @@ export default function AnalyzingPage() {
 
         const analysis = await response.json();
         sessionStorage.setItem("taxAnalysis", JSON.stringify(analysis));
-        router.push(analysis.isEligible !== false ? "/signup" : "/results");
+        if (analysis.isNotTaxReturn) {
+          router.push("/not-a-return");
+        } else {
+          router.push(analysis.isEligible !== false ? "/signup" : "/results");
+        }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         sessionStorage.setItem("taxAnalysis", JSON.stringify({

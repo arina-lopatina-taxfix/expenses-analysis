@@ -21,6 +21,16 @@ HMRC ALLOWABLE EXPENSES (UK Self Assessment):
 const COMBINED_PROMPT = `You are a UK tax expert. Read the uploaded SA100 Self Assessment PDF (if provided) and produce a complete tax analysis in one JSON response.
 
 ────────────────────────────────────────
+STEP 0 — DOCUMENT VALIDATION
+────────────────────────────────────────
+First check if the uploaded document is a UK Self Assessment tax return (SA100 form, with or without supplementary pages SA102/SA103S/SA103F/SA105).
+
+If it is NOT a UK Self Assessment tax return (e.g. it is a payslip, P60, P45, bank statement, invoice, utility bill, CV, or any other document), respond ONLY with:
+{"isNotTaxReturn":true,"taxYear":null,"incomeType":"Unknown","isEligible":false,"businessType":null,"turnover":null,"totalMissedDeductions":0,"alreadyClaiming":[],"canImprove":[]}
+
+Do NOT proceed to the steps below for non-tax-return documents.
+
+────────────────────────────────────────
 PART 1 — EXTRACT FROM PDF
 ────────────────────────────────────────
 Read every page carefully — SA100, SA102, SA103S, SA103F, SA105.
@@ -105,6 +115,7 @@ RETURN FORMAT
 ────────────────────────────────────────
 Return ONLY valid JSON, no markdown, no code fences:
 {
+  "isNotTaxReturn": false,
   "taxYear": "2024/25",
   "incomeType": "Self-employed",
   "isEligible": true,

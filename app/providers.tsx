@@ -2,7 +2,7 @@
 
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
-import { useEffect, useRef, Suspense } from "react";
+import { useEffect, useLayoutEffect, useRef, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 function PageviewTracker() {
@@ -16,11 +16,15 @@ function PageviewTracker() {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   }, []);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  // useLayoutEffect runs before the browser paints — this prevents the page
+  // from being briefly visible at the previous scroll position.
+  useLayoutEffect(() => {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }, [pathname, searchParams]);
 
+  useEffect(() => {
     // Skip the very first render — the loaded callback handles that pageview
     // to guarantee PostHog is initialised before it fires.
     if (isFirst.current) {

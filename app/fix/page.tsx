@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { track } from "@vercel/analytics";
 
-const TAXFIX_URL = "https://staging.taxfix.tech/en-uk/assessment/signup";
+const TAXFIX_URL = "https://taxfix.com/en-uk/assessment/signup";
 const ILLUSTRATION = "/list-tasks.png";
 
 export default function FixPage() {

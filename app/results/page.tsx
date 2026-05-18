@@ -324,7 +324,7 @@ export default function ResultsPage() {
             {/* CTAs */}
             <div className="flex flex-col gap-[8px] items-center w-full max-w-[300px]">
               <a
-                href="https://staging.taxfix.tech/en-uk/assessment/signup"
+                href="https://taxfix.com/en-uk/assessment/signup"
                 className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
                 style={{ background: "#a0d766", fontWeight: 500 }}
               >

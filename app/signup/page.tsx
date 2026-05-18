@@ -156,7 +156,7 @@ export default function SignUpPage() {
         #sib-container .entry__label { color: #000000 !important; }
         #sib-container .input {
           border: 1px solid #96928E !important;
-          border-radius: 15px !important;
+          border-radius: 10px !important;
           height: 50px !important;
           width: 100% !important;
           padding-left: 16px !important;
@@ -165,10 +165,18 @@ export default function SignUpPage() {
           width: 100% !important;
           height: 50px !important;
           color: #154618 !important;
+          border-radius: 10px !important;
         }
         #sib-container .sib-form-block__button .icon {
           width: 20px !important;
           height: 20px !important;
+        }
+        #sib-container .checkbox_tick_positive {
+          border-color: #a0d766 !important;
+        }
+        #sib-container input.input_replaced:checked ~ .checkbox_tick_positive {
+          background-color: #a0d766 !important;
+          border-color: #a0d766 !important;
         }
       `}</style>
       <div className="flex flex-1 items-center justify-center px-4">

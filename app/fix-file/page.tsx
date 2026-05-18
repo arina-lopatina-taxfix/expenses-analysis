@@ -28,8 +28,7 @@ export default function FixFilePage() {
         <div className="flex flex-col items-center w-full max-w-[300px]">
           <a
             href={TAXFIX_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            onClick={(e) => { e.preventDefault(); window.open(TAXFIX_URL, "_blank"); }}
             className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
             style={{ background: "#a0d766", fontWeight: 500 }}
           >

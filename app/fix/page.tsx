@@ -37,6 +37,8 @@ export default function FixPage() {
           </a>
           <a
             href={TAXFIX_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center justify-center h-[48px] w-full text-[16px] text-[#154618] hover:opacity-70 transition-opacity"
             style={{ fontWeight: 500 }}
           >

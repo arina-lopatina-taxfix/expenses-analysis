@@ -35,7 +35,7 @@ export default function FunnelPage() {
             className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
             style={{ background: "#a0d766", fontWeight: 500 }}
           >
-            Complete a test
+            Complete a test (~2 mins)
           </a>
           <button
             onClick={() => router.push("/profile")}

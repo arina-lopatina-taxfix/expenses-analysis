@@ -1,101 +1,60 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
-import { usePageFlag } from "@/lib/usePageFlag";
-import type { UserProfile } from "@/lib/types";
 
-const OPTIONS: { key: keyof UserProfile; label: string }[] = [
-  { key: "married", label: "💍 Married" },
-  { key: "dependants", label: "👶🏻 Dependants" },
-  { key: "studentLoan", label: "🎓 Student loan" },
-  { key: "homeowner", label: "🔑 Homeowner" },
-  { key: "renter", label: "🏠 Renter" },
-];
+const ILLUSTRATION = "/list-tasks.png";
+const TEST_URL = "https://taxfix.com/en-uk/expenses-test/";
 
-export default function ProfilePage() {
+export default function FunnelPage() {
   const router = useRouter();
-  const pageEnabled = usePageFlag("profile-page");
 
-  useEffect(() => { track("page_viewed", { page: "profile" }); }, []);
-
-  if (!pageEnabled) return null;
-
-  const [profile, setProfile] = useState<UserProfile>({
-    married: false,
-    dependants: false,
-    studentLoan: false,
-    homeowner: false,
-    renter: false,
-  });
-
-  function toggle(key: keyof UserProfile) {
-    setProfile((prev) => ({ ...prev, [key]: !prev[key] }));
-  }
-
-  function handleContinue() {
-    sessionStorage.setItem("userProfile", JSON.stringify(profile));
-    router.push("/upload");
-  }
+  useEffect(() => { track("page_viewed", { page: "funnel" }); }, []);
 
   return (
-    <main className="bg-white min-h-screen flex flex-col" style={{ marginTop: -40 }}>
-      {/* Content */}
-      <div className="flex flex-1 flex-col items-center px-4 pt-8 pb-8">
-        <div className="flex flex-col gap-[36px] items-center w-full max-w-[560px]">
-          {/* Heading */}
-          <div className="flex flex-col gap-[6px] items-center justify-center">
-            <p className="font-bold leading-[1.2] text-[30px] text-black text-center">
-              {"Let's get to know you!"}
-            </p>
-            <p className="text-[14px] leading-[1.3] text-[rgba(12,11,10,0.6)] text-center">
-              Select all that apply so we can find you eligible credits and deductions
-            </p>
-          </div>
+    <main className="bg-white min-h-screen flex flex-col px-4" style={{ marginTop: -40 }}>
+      {/* Callout */}
+      <div className="flex justify-center pt-8">
+        <div className="flex items-center gap-[16px] px-[16px] py-[10px] bg-[#f9f7f5] rounded-[11px]">
+          <svg width="20" height="20" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+            <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" fill="rgba(12,11,10,0.8)"/>
+          </svg>
+          <p className="text-[16px] text-[rgba(12,11,10,0.8)] leading-[1.3]" style={{ fontWeight: 400 }}>
+            7/10 people miss out on expenses they&apos;re legally entitled to claim
+          </p>
+        </div>
+      </div>
 
-          {/* Options */}
-          <div className="flex flex-col gap-[12px] w-full">
-            {OPTIONS.map((opt) => {
-              const checked = profile[opt.key];
-              return (
-                <button
-                  key={opt.key}
-                  onClick={() => toggle(opt.key)}
-                  className="flex gap-[16px] items-center px-[24px] py-[16px] relative w-full text-left"
-                >
-                  <div className="absolute bg-white border border-[#8e8e8e] inset-0 rounded-[16px]" />
-                  <span
-                    className="flex items-center justify-center shrink-0 relative z-10"
-                    style={{
-                      width: 20,
-                      height: 20,
-                      borderRadius: 4,
-                      border: checked ? "none" : "1.5px solid #96928e",
-                      background: checked ? "#a0d766" : "white",
-                    }}
-                  >
-                    {checked && (
-                      <svg viewBox="0 0 12 10" fill="none" className="w-3 h-2.5">
-                        <path d="M1 5L4.5 8.5L11 1" stroke="#154618" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="text-[16px] text-[#0c0b0a] leading-[20px] relative z-10" style={{ fontWeight: 500 }}>
-                    {opt.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+      {/* Main content */}
+      <div className="flex flex-1 flex-col items-center justify-center gap-[24px]">
+        <div className="relative shrink-0" style={{ width: 250, height: 250 }}>
+          <img alt="" className="absolute inset-0 object-cover size-full pointer-events-none" src={ILLUSTRATION} />
+        </div>
 
-          {/* Button */}
+        <div className="flex flex-col gap-[6px] items-center text-center" style={{ maxWidth: 560 }}>
+          <p className="text-[30px] text-black leading-[1.2]" style={{ fontWeight: 700 }}>
+            Are you leaving money on the table?
+          </p>
+          <p className="text-[14px] text-[rgba(12,11,10,0.6)] leading-[1.3] text-center" style={{ maxWidth: 514 }}>
+            Answer a few quick questions and our smart tax engine will help find your unclaimed expenses. Or, if you want it to be really accurate, you can upload your previous year&apos;s tax return and we can spot every deduction you might be missing.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-[8px] items-center w-full max-w-[300px]">
+          <a
+            href={TEST_URL}
+            className="flex items-center justify-center h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
+            style={{ background: "#a0d766", fontWeight: 500 }}
+          >
+            Find out what I can claim
+          </a>
           <button
-            onClick={handleContinue}
-            className="bg-[#a0d766] h-[48px] rounded-[10px] w-full text-[#154618] text-[16px] hover:brightness-95 active:scale-[0.98] transition-all"
+            onClick={() => router.push("/profile")}
+            className="flex items-center justify-center h-[48px] w-full text-[16px] text-[#154618] hover:opacity-70 transition-opacity"
             style={{ fontWeight: 500 }}
           >
-            Continue
+            Analyse my tax return
           </button>
         </div>
       </div>

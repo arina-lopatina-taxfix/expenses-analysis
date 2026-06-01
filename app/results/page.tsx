@@ -332,7 +332,7 @@ export default function ResultsPage() {
                 Get help with my tax return
               </a>
               <button
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/profile")}
                 className="flex items-center justify-center gap-[8px] h-[48px] w-full rounded-[10px] text-[16px] text-[#154618]"
                 style={{ fontWeight: 500 }}
               >

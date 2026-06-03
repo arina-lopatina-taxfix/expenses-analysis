@@ -353,13 +353,14 @@ ${pdfBase64 ? "Analyse this Self Assessment return and generate the complete tax
     ];
 
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: [{ role: "user", parts }],
       config: {
         systemInstruction: COMBINED_PROMPT,
         responseMimeType: "application/json",
         temperature: 0.2,
         maxOutputTokens: 4096,
+        thinkingConfig: { thinkingBudget: 0 },
       },
     });
 
